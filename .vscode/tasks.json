@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build-wx",
+            "type": "shell",
+            "command": "/bin/zsh",
+            "args": [
+                "-c",
+                "clang++ -std=c++17 main.cpp -o wEditor $(/opt/homebrew/bin/wx-config --cxxflags --libs)"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"]
+        }
+    ]
+}
