@@ -127,8 +127,8 @@ void MainFrame::OnOpen(wxCommandEvent& event)
 //ts shows the about window
 void MainFrame::OnAbout(wxCommandEvent& event)
 {
-    wxMessageBox("wEditor Alpha v1.1",
-                 "wEditor is simple cross-platform and open-souce text editor written on C++ using wxWidgets framework.", wxOK | wxICON_INFORMATION);
+    wxMessageBox("wEditor is simple cross-platform and open-souce text editor written on C++ using wxWidgets framework.",
+                 "wEditor Alpha v1.2", wxOK | wxICON_INFORMATION);
 }
 
 //ts closes the app
