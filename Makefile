@@ -1,6 +1,6 @@
 CXX = clang++
 CXXFLAGS = -std=c++20
-SRC = main.cpp
+SRC = main.cpp SyntaxHighlightCPP.cpp
 TARGET = wEditor
 WX_CONFIG = /usr/local/bin/wx-config
 all: $(TARGET)

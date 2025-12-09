@@ -12,6 +12,7 @@
 #include <wx/filedlg.h>
 #include <wx/file.h>
 #include "MainFrame.h"
+#include "SyntaxHighlightCPP.h"
 
 //app class to launch this fuckass editor
 class App : public wxApp
@@ -49,6 +50,16 @@ MainFrame::MainFrame(const wxString& title)
 
     save->Bind(wxEVT_BUTTON, &MainFrame::OnSave, this);
     open->Bind(wxEVT_BUTTON, &MainFrame::OnOpen, this);
+    textCtrl->Bind(wxEVT_CHAR_HOOK, [this](wxKeyEvent& evt) {
+    if (evt.GetKeyCode() == WXK_TAB) {
+        long from, to;
+        textCtrl->GetSelection(&from, &to);
+        textCtrl->Replace(from, to, "    ");
+        textCtrl->SetInsertionPoint(from + 4);
+        return;
+    }
+    evt.Skip();
+    });
     Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_TEXT, &MainFrame::OnText, this);
 }
@@ -65,58 +76,10 @@ bool App::OnInit() {
     return true;
 }
 
-void MainFrame::OnText(wxCommandEvent& evt)
+//syntax highlight function
+void MainFrame::OnText(wxCommandEvent& event)
 {
-    HighlightSyntax();
-    evt.Skip();
-}
-
-
-void MainFrame::HighlightSyntax()
-{
-    wxString text = textCtrl->GetValue();
-
-    wxTextAttr normal(*wxBLACK);
-    textCtrl->SetStyle(0, text.length(), normal);
-
-    std::vector<wxString> keywords = {
-        "return", "if", "else", "while"
-    };
-
-    for (const auto& word : keywords)
-    {
-        size_t pos = text.find(word);
-        while (pos != wxString::npos) {
-            wxTextAttr kw(wxColour(128, 0, 128));
-            textCtrl->SetStyle(pos, pos + word.length(), kw);
-            pos = text.find(word, pos + 1);
-        }
-    }
-
-    std::vector<wxString> types = {
-        "string", "char", "int", "float", "double", "bool", "void"
-    };
-    for (const auto& type : types)
-    {
-        size_t pos = text.find(type);
-        while (pos != wxString::npos) {
-            wxTextAttr typeAttr(*wxBLUE);
-            textCtrl->SetStyle(pos, pos + type.length(), typeAttr);
-            pos = text.find(type, pos + 1);
-        }   
-    }
-    std::vector<wxString> comments = {
-        "//", "/*", "*/"
-    };
-    for (const auto& comment : comments)
-    {
-        size_t pos = text.find(comment);
-        while (pos != wxString::npos) {
-            wxTextAttr commentAttr(*wxGREEN);
-            textCtrl->SetStyle(pos, pos + comment.length(), commentAttr);
-            pos = text.find(comment, pos + 1);
-        }
-    }
+    SyntaxHighlightCPP::ApplyCPPHighLight(textCtrl);
 }
 
 //save file function
