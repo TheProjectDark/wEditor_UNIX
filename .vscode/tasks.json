@@ -7,7 +7,7 @@
             "command": "/bin/zsh",
             "args": [
                 "-c",
-                "clang++ -std=c++20 main.cpp SyntaxHighlightCPP.cpp -o wEditor $(/usr/local/bin/wx-config --cxxflags --libs)"
+                "clang++ -std=c++20 main.cpp SyntaxHighlighter/SyntaxHighlighter.cpp Syntaxhighlighter/SyntaxHighlightCPP.cpp SyntaxHighlighter/SyntaxHighlightPython.cpp -o wEditor $(/usr/local/bin/wx-config --cxxflags --libs)"
             ],
             "group": {
                 "kind": "build",
