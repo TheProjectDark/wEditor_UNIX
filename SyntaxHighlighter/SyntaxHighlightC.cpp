@@ -7,9 +7,9 @@
  * (at your option) any later version.
  */
 
-#include "SyntaxHighlightCPP.h"
+#include "SyntaxHighlightC.h"
 
-void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
+void SyntaxHighlightC::ApplyHighlight(wxTextCtrl* textCtrl)
 {
 
     wxString text = textCtrl->GetValue();
@@ -44,10 +44,9 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
             pos = text.find(ns, pos + 1);
         }
     }
-
     //types
     std::vector<wxString> types = {
-        "int", "float", "double", "char", "void", "bool", "long", "short", "unsigned", "signed", "std::string", "std::vector", "std::map", "string", "class"
+        "int", "float", "double", "char", "void", "bool", "long", "short", "unsigned", "signed", "string"
     };
     for (const auto& type : types)
     {
@@ -56,12 +55,12 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
             wxTextAttr typeAttr(wxColour(51, 153, 255));
             textCtrl->SetStyle(pos, pos + type.length(), typeAttr);
             pos = text.find(type, pos + 1);
-        }   
+        }
     }
 
     //standard lib functions
     std::vector<wxString> standardLibraryFunctions = {
-        "printf", "scanf", "cout", "cin", "endl", "std::cout", "std::cin"
+        "printf", "scanf", "endl", 
     };
     for (const auto& func : standardLibraryFunctions)
     {
@@ -77,19 +76,19 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
     std::vector<wxString> keywords = {
         "return", "if", "else", "while", "override", "virtual", "const", "static", "new", "delete", "this"
     };
-    for (const auto& word : keywords)
+    for (const auto& word: keywords)
     {
         size_t pos = text.find(word);
         while (pos != wxString::npos) {
-            wxTextAttr kw(wxColour(230, 0, 230));
-            textCtrl->SetStyle(pos, pos + word.length(), kw);
+            wxTextAttr keywordsAttr(wxColour(230, 0, 230));
+            textCtrl->SetStyle(pos, pos + word.length(), keywordsAttr);
             pos = text.find(word, pos + 1);
         }
     }
 
     //control structures
     std::vector<wxString> controlStructures = {
-        "for", "switch", "case", "break", "continue"
+        "for", "while", "do", "switch", "case", "break"
     };
     for (const auto& cs : controlStructures)
     {
@@ -101,25 +100,25 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         }
     }
 
-    //access modifiers
+    //acces modifiers
     std::vector<wxString> accessModifiers = {
         "public", "private", "protected"
     };
-    for (const auto& modifier : accessModifiers)
+    for (const auto& am : accessModifiers) 
     {
-        size_t pos = text.find(modifier);
+        size_t pos = text.find(am);
         while (pos != wxString::npos) {
-            wxTextAttr modAttr(wxColour(0, 0, 255));
-            textCtrl->SetStyle(pos, pos + modifier.length(), modAttr);
-            pos = text.find(modifier, pos + 1);
+            wxTextAttr amAttr(wxColour(0, 0, 255));
+            textCtrl->SetStyle(pos, pos + am.length(), amAttr);
+            pos = text.find(am, pos + 1);
         }
     }
 
     //literals
     std::vector<wxString> literals = {
         "true", "false", "NULL"
-    }; 
-    for (const auto& literal : literals)
+    };
+    for (const auto& literal: literals)
     {
         size_t pos = text.find(literal);
         while (pos != wxString::npos) {
@@ -134,19 +133,17 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         "\"", "'"
     };
     for (const auto& delimiter : stringDelimiters)
-    {
-        size_t pos = text.find(delimiter);
+    {        size_t pos = text.find(delimiter);
         while (pos != wxString::npos) {
             size_t endPos = text.find(delimiter, pos + 1);
             if (endPos != wxString::npos) {
-                wxTextAttr stringAttr(wxColour(255, 140, 0));
-                textCtrl->SetStyle(pos, endPos + 1, stringAttr);
+                wxTextAttr strAttr(wxColour(255, 140, 0));
+                textCtrl->SetStyle(pos, endPos + 1, strAttr);
                 pos = text.find(delimiter, endPos + 1);
             } else {
                 break;
             }
         }
-
     }
 
     //operators

@@ -9,14 +9,18 @@
 
 #include "SyntaxHighlighter.h"
 #include "SyntaxHighlightCPP.h"
+#include "SyntaxHighlightC.h"
 #include "SyntaxHighlightPython.h"
 
 SyntaxHighlighter* HighlighterFactory::CreateHighlighter(const wxString& language) {
     if (language == "C++") {
         return new SyntaxHighlightCPP();
+    }
+    else if (language == "C") {
+        return new SyntaxHighlightC();
     } 
     else if (language == "Python") {
-        return new SyntaxHighlightPython();
+        return new SyntaxHighlightPython();    
     }
     return new SyntaxHighlightCPP();
 }
@@ -24,6 +28,7 @@ SyntaxHighlighter* HighlighterFactory::CreateHighlighter(const wxString& languag
 std::vector<wxString> HighlighterFactory::GetAvailableLanguages() {
     return {
         "C++",
+        "C",
         "Python"
     };
 }
