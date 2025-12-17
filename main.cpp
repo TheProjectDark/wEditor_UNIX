@@ -10,7 +10,7 @@
 #include <wx/wx.h>
 #include <wx/filedlg.h>
 #include <wx/file.h>
-#include "MainFrame.h"
+#include "Functions/MainFrame.h"
 
 //app class to launch this fuckass editor
 class App : public wxApp
@@ -45,6 +45,10 @@ MainFrame::MainFrame(const wxString& title)
     wxButton* save = new wxButton(panel, wxID_ANY, "Save");
     wxButton* open = new wxButton(panel, wxID_ANY, "Open");
 
+    //enabling drag and drop
+    DragNDrop* dropTarget = new DragNDrop(this);
+    textCtrl->SetDropTarget(dropTarget);
+
     //language choice dropdown
     std::vector<wxString> languages = HighlighterFactory::GetAvailableLanguages();
     languageChoice = new wxChoice(panel, wxID_ANY);
@@ -52,7 +56,7 @@ MainFrame::MainFrame(const wxString& title)
         languageChoice->Append(lang);
     }
     languageChoice->SetSelection(0);
-    currentHighlighter = HighlighterFactory::CreateHighlighter("C++");
+    currentHighlighter = HighlighterFactory::CreateHighlighter("Text");
     
     //ts is for style or smth like that
     textCtrl->SetBackgroundColour(wxColour(40, 40, 40));
@@ -194,6 +198,44 @@ void MainFrame::OnOpen(wxCommandEvent& event)
     file.Close();
 
     textCtrl->SetValue(text);
+    //applying syntax highlighting according to file type
+    wxString ext = openFileDialog.GetFilename().AfterLast('.');
+    if (ext == "cpp" || ext == "h" || ext == "hpp" ) {
+        languageChoice->SetStringSelection("C++");
+    } else if (ext == "c") {
+        languageChoice->SetStringSelection("C");
+    } else if (ext == "py") {
+        languageChoice->SetStringSelection("Python");
+    } else {
+        languageChoice->SetStringSelection("Text");
+    }
+
+    delete currentHighlighter;
+    currentLanguage = languageChoice->GetStringSelection();
+    currentHighlighter = HighlighterFactory::CreateHighlighter(currentLanguage);
+    HighlightSyntax();
+}
+
+//drag and drop function
+void MainFrame::OnDropFiles(const wxArrayString& filenames)
+{
+    if (filenames.GetCount() > 0)
+    {
+        wxString path = filenames[0];
+        wxFile file;
+        if (!file.Open(path))
+        {
+            wxMessageBox("Failed to open file");
+            return;
+        }
+
+        wxString text;
+        file.ReadAll(&text);
+        file.Close();
+
+        textCtrl->SetValue(text);
+        HighlightSyntax();
+    }
 }
 
 //ts shows the about window

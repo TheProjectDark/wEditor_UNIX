@@ -1,0 +1,41 @@
+#shi
+build/
+bin/
+obj/
+out/
+*.o
+*.obj
+*.exe
+*.out
+*.so
+*.dll
+*.a
+
+#cmake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+#ide
+.idea/
+*.iml
+.vs/
+*.suo
+*.user
+*.vcxproj.user
+*.code-workspace
+
+#macOS files
+.DS_Store
+*.xcworkspace
+*.xcuserdata
+
+#log files
+*.log
+*.tmp
+*.swp
+*~
+
+#wxWidgets build files
+*.dbg

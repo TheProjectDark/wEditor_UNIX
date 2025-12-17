@@ -7,12 +7,15 @@
  * (at your option) any later version.
  */
 
-#pragma once
-#include <wx/wx.h>
-#include "SyntaxHighlighter.h"
+#include "DragNDrop.h"
+#include "MainFrame.h"
 
-class SyntaxHighlightPython : public SyntaxHighlighter {
-public:
-    void ApplyHighlight(wxTextCtrl* textCtrl) override;
-    wxString GetLanguageName() const override { return "Python"; }
-};
+bool DragNDrop::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames)
+{
+    for (const auto& filename : filenames) {
+        wxArrayString fileArray;
+        fileArray.Add(filename);
+        m_frame->OnDropFiles(fileArray);
+    }
+    return true;
+}

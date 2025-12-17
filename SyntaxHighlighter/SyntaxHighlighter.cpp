@@ -13,7 +13,7 @@
 #include "SyntaxHighlightPython.h"
 
 SyntaxHighlighter* HighlighterFactory::CreateHighlighter(const wxString& language) {
-    if (language.IsEmpty()) {
+    if (language == "Text") {
         return nullptr;
     }
     else if (language == "C++") {

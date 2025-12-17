@@ -8,11 +8,13 @@
  */
 
 #pragma once
-#include <wx/wx.h>
-#include "SyntaxHighlighter.h"
+#include <wx/dnd.h>
 
-class SyntaxHighlightPython : public SyntaxHighlighter {
+class MainFrame; // forward-declare to avoid include cycle
+
+class DragNDrop : public wxFileDropTarget {
+    MainFrame* m_frame;
 public:
-    void ApplyHighlight(wxTextCtrl* textCtrl) override;
-    wxString GetLanguageName() const override { return "Python"; }
+    explicit DragNDrop(MainFrame* frame) : m_frame(frame) {}
+    bool OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& filenames) override;
 };
