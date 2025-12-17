@@ -13,7 +13,10 @@
 #include "SyntaxHighlightPython.h"
 
 SyntaxHighlighter* HighlighterFactory::CreateHighlighter(const wxString& language) {
-    if (language == "C++") {
+    if (language.IsEmpty()) {
+        return nullptr;
+    }
+    else if (language == "C++") {
         return new SyntaxHighlightCPP();
     }
     else if (language == "C") {
@@ -27,6 +30,7 @@ SyntaxHighlighter* HighlighterFactory::CreateHighlighter(const wxString& languag
 
 std::vector<wxString> HighlighterFactory::GetAvailableLanguages() {
     return {
+        "Text",
         "C++",
         "C",
         "Python"
