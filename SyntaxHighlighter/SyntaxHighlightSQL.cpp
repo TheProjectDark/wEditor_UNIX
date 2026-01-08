@@ -1,6 +1,6 @@
 /*
  * wEditor
- * Copyright (C) 2025 TheProjectDark
+ * Copyright (C) 2026 TheProjectDark
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -18,7 +18,8 @@ void SyntaxHighlightSQL::ApplyHighlight(wxTextCtrl* textCtrl)
 
     //SQL keywords
     std::vector<wxString> keywords = {
-        "SELECT", "FROM", "WHERE", "INSERT", "UPDATE", "DELETE", "JOIN", "INNER", "LEFT", "RIGHT", "ON", "CREATE", "TABLE", "ALTER", "DROP", "INDEX", "VIEW", "TRIGGER", "PROCEDURE", "FUNCTION", "UNION", "GROUP BY", "ORDER BY", "HAVING", "DISTINCT", "AS", "AND", "OR", "NOT", "IN", "IS", "NULL", "LIKE", "BETWEEN", "EXISTS"
+        "SELECT", "FROM", "WHERE", "INSERT", "UPDATE", "DELETE", "JOIN", "INNER", "LEFT", "RIGHT", "ON", "CREATE", "TABLE", "ALTER", "DROP", "INDEX", "VIEW", "TRIGGER", "PROCEDURE", "FUNCTION", "UNION", "GROUP BY", "ORDER BY", "HAVING", "DISTINCT", "AS", "AND", "OR", "NOT", "IN", "IS", "NULL", "LIKE", "BETWEEN", "EXISTS",
+        "select", "from", "where", "insert", "update", "delete", "join", "inner", "left", "right", "on", "create", "table", "alter", "drop", "index", "view", "trigger", "procedure", "function", "union", "group by", "order by", "having", "distinct", "as", "and", "or", "not", "in", "is", "null", "like", "between", "exists"
     };
 
     for (const auto& keyword : keywords)
@@ -28,6 +29,21 @@ void SyntaxHighlightSQL::ApplyHighlight(wxTextCtrl* textCtrl)
             wxTextAttr keywordAttr(wxColour(0, 153, 51));
             textCtrl->SetStyle(pos, pos + keyword.length(), keywordAttr);
             pos = text.find(keyword, pos + 1);
+        }
+    }
+
+    //data types
+    std::vector<wxString> dataTypes = {
+        "INT", "VARCHAR", "CHAR", "TEXT", "DATE", "FLOAT", "DOUBLE", "BOOLEAN", "DECIMAL", "BLOB",
+        "int", "varchar", "char", "text", "date", "float", "double", "boolean", "decimal", "blob"
+    };
+    for (const auto& dtype : dataTypes)
+    {
+        size_t pos = text.find(dtype);
+        while (pos != wxString::npos) {
+            wxTextAttr typeAttr(wxColour(0, 102, 204));
+            textCtrl->SetStyle(pos, pos + dtype.length(), typeAttr);
+            pos = text.find(dtype, pos + 1);
         }
     }
 
