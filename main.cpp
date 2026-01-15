@@ -204,6 +204,8 @@ void MainFrame::OnOpen(wxCommandEvent& event)
         languageChoice->SetStringSelection("C++");
     } else if (ext == "c") {
         languageChoice->SetStringSelection("C");
+    } else if (ext == "java" || ext == "jav" || ext == "class") {
+        languageChoice->SetStringSelection("Java");
     } else if (ext == "py") {
         languageChoice->SetStringSelection("Python");
     } else if (ext == "asm" || ext == "s") {

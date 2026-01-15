@@ -47,6 +47,18 @@ void SyntaxHighlightSQL::ApplyHighlight(wxTextCtrl* textCtrl)
         }
     }
 
+    //symbols
+    std::vector<wxString> symbols = { ",", ";", "(", ")", "=", "<", ">", "+", "-", "*", "/" };
+    for (const auto& symbol : symbols)
+    {
+        size_t pos = text.find(symbol);
+        while (pos != wxString::npos) {
+            wxTextAttr symbolAttr(wxColour(255, 102, 204));
+            textCtrl->SetStyle(pos, pos + symbol.length(), symbolAttr);
+            pos = text.find(symbol, pos + 1);
+        }
+    }
+
     //comments
     size_t commentPos = text.find("--");
     while (commentPos != wxString::npos) {
