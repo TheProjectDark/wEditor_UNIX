@@ -61,4 +61,44 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
             pos = text.find(keyword, pos + 1); 
         }
     }
+
+    //acces modifiers
+    std::vector<wxString> accessModifiers = {
+        "public", "private", "protected"
+    };
+    for (const auto& am : accessModifiers)
+    {
+        size_t pos = text.find(am);
+        while (pos != wxString::npos) {
+            wxTextAttr amAttr(wxColour(107, 107, 255));
+            textCtrl->SetStyle(pos, pos + am.length(), amAttr);
+            pos = text.find(am, pos + 1);
+        }
+    }
+
+    //literals
+    std::vector<wxString> literals = {
+        "true", "false", "null"
+    };
+    for (const auto& literal : literals)
+    {
+        size_t pos = text.find(literal);
+        while (pos != wxString::npos) {
+            wxTextAttr litAttr(*wxRED);
+            textCtrl->SetStyle(pos, pos + literal.length(), litAttr);
+            pos = text.find(literal, pos + 1);
+        }
+    }
+
+    //comments
+    size_t pos = text.find("//");
+    while (pos != wxString::npos) {
+        size_t endPos = text.find("\n", pos);
+        if (endPos == wxString::npos) {
+            endPos = text.length();
+        }
+        wxTextAttr commentAttr(wxColour(128, 255, 170));
+        textCtrl->SetStyle(pos, endPos, commentAttr);
+        pos = text.find("//", endPos);
+    }
 }

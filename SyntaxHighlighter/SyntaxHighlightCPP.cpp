@@ -109,7 +109,7 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(modifier);
         while (pos != wxString::npos) {
-            wxTextAttr modAttr(wxColour(0, 0, 255));
+            wxTextAttr modAttr(wxColour(107, 107, 255));
             textCtrl->SetStyle(pos, pos + modifier.length(), modAttr);
             pos = text.find(modifier, pos + 1);
         }

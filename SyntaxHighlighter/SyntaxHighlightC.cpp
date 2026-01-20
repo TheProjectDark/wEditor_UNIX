@@ -108,7 +108,7 @@ void SyntaxHighlightC::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(am);
         while (pos != wxString::npos) {
-            wxTextAttr amAttr(wxColour(0, 0, 255));
+            wxTextAttr amAttr(wxColour(107, 107, 255));
             textCtrl->SetStyle(pos, pos + am.length(), amAttr);
             pos = text.find(am, pos + 1);
         }
