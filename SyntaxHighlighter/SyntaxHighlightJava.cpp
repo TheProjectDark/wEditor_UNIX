@@ -90,6 +90,60 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
         }
     }
 
+    //strings
+    std::vector<wxString> stringDelimiters = {
+        "\"", "'"
+    };
+    for (const auto& delimiter : stringDelimiters)
+    {
+        size_t pos = text.find(delimiter);
+        while (pos != wxString::npos) {
+            wxTextAttr stringAttr(wxColour(255, 140, 0));
+            textCtrl->SetStyle(pos, pos + delimiter.length(), stringAttr);
+            pos = text.find(delimiter, pos + 1);
+        }
+    }
+
+    //operators
+    std::vector<wxString> operators_multi = {
+        "==", "!=", "<=", ">=", "&&", "||", "++", "--"
+    };
+    std::vector<wxString> operators_single = {
+        "+", "-", "*", "/", "=", "<", ">", 
+    };
+    for (const auto& op : operators_multi)
+    {
+        size_t pos = text.find(op);
+        while (pos != wxString::npos) {
+            wxTextAttr opAttr(wxColour(255, 0, 0));
+            textCtrl->SetStyle(pos, pos + op.length(), opAttr);
+            pos = text.find(op, pos + 1);
+        }
+    }
+    for (const auto& op : operators_single)
+    {
+        size_t pos = text.find(op);
+        while (pos != wxString::npos) {
+            wxTextAttr opAttr(wxColour(255, 0, 0));
+            textCtrl->SetStyle(pos, pos + op.length(), opAttr);
+            pos = text.find(op, pos + 1);
+        }
+    }
+
+    //symbols
+    std::vector<wxString> symbols = {
+        "{", "}", "(", ")", "[", "]", ";", ",", "."
+    };
+    for (const auto& sym : symbols)
+    {
+        size_t pos = text.find(sym);
+        while (pos != wxString::npos) {
+            wxTextAttr symAttr(wxColour(255, 102, 204));
+            textCtrl->SetStyle(pos, pos + sym.length(), symAttr);
+            pos = text.find(sym, pos + 1);
+        }
+    }
+
     //comments
     size_t pos = text.find("//");
     while (pos != wxString::npos) {
