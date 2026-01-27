@@ -12,7 +12,6 @@
 void SyntaxHighlightAssembly::ApplyHighlight(wxTextCtrl* textCtrl)
 {
     wxString text = textCtrl->GetValue();
-    highlightRange.occupiedRanges.clear();
 
     wxTextAttr normal (*wxWHITE);
     textCtrl->SetStyle(0, text.length(), normal);
@@ -26,11 +25,8 @@ void SyntaxHighlightAssembly::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(instr);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + instr.length())) {
-                wxTextAttr instrAttr(wxColour(0, 153, 51));
-                textCtrl->SetStyle(pos, pos + instr.length(), instrAttr);
-                highlightRange.Mark(pos, pos + instr.length());
-            }
+            wxTextAttr instrAttr(wxColour(0, 153, 51));
+            textCtrl->SetStyle(pos, pos + instr.length(), instrAttr);
             pos = text.find(instr, pos + 1);
         }
     }
@@ -47,11 +43,8 @@ void SyntaxHighlightAssembly::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(reg);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + reg.length())) {
-                wxTextAttr regAttr(wxColour(0, 102, 204));
-                textCtrl->SetStyle(pos, pos + reg.length(), regAttr);
-                highlightRange.Mark(pos, pos + reg.length());
-            }
+            wxTextAttr regAttr(wxColour(0, 102, 204));
+            textCtrl->SetStyle(pos, pos + reg.length(), regAttr);
             pos = text.find(reg, pos + 1);
         }
     }
@@ -59,44 +52,31 @@ void SyntaxHighlightAssembly::ApplyHighlight(wxTextCtrl* textCtrl)
     //comments
     size_t commentPos = text.find(";");
     while (commentPos != wxString::npos) {
-        if (!highlightRange.IsOccupied(commentPos, commentPos + 1)) {
-            wxTextAttr commentAttr(wxColour(128, 128, 128));
-            textCtrl->SetStyle(commentPos, text.length(), commentAttr);
-            highlightRange.Mark(commentPos, text.length());
-            commentPos = text.find(";", commentPos + 1);
-        } else {
-            commentPos = text.find(";", commentPos + 1);
-        }
+        wxTextAttr commentAttr(wxColour(128, 128, 128));
+        textCtrl->SetStyle(commentPos, text.length(), commentAttr);
+        commentPos = text.find(";", commentPos + 1);
     }
 
     //numbers
     for (size_t i = 0; i < text.length(); ++i) {
         if (wxIsdigit(text[i])) {
-            if (!highlightRange.IsOccupied(i, i + 1)) {
-                size_t start = i;
-                while (i < text.length() && wxIsdigit(text[i])) {
-                    ++i;
-                }
-                wxTextAttr numberAttr(wxColour(204, 0, 204));
-                textCtrl->SetStyle(start, i, numberAttr);
-                highlightRange.Mark(start, i);
+            size_t start = i;
+            while (i < text.length() && wxIsdigit(text[i])) {
+                ++i;
             }
+            wxTextAttr numberAttr(wxColour(204, 0, 204));
+            textCtrl->SetStyle(start, i, numberAttr);
         }
     }
 
     //labels
     size_t labelPos = text.find(":");
     while (labelPos != wxString::npos) {
-        if (!highlightRange.IsOccupied(labelPos, labelPos + 1)) {
-            size_t start = text.rfind('\n', labelPos);
-            if (start == wxString::npos) start = 0; else start += 1;
-            wxTextAttr labelAttr(wxColour(255, 153, 0));
-            textCtrl->SetStyle(start, labelPos + 1, labelAttr);
-            highlightRange.Mark(start, labelPos + 1);
-            labelPos = text.find(":", labelPos + 1);
-        } else {
-            labelPos = text.find(":", labelPos + 1);
-        }
+        size_t start = text.rfind('\n', labelPos);
+        if (start == wxString::npos) start = 0; else start += 1;
+        wxTextAttr labelAttr(wxColour(255, 153, 0));
+        textCtrl->SetStyle(start, labelPos + 1, labelAttr);
+        labelPos = text.find(":", labelPos + 1);
     }
 
     //directives
@@ -107,11 +87,8 @@ void SyntaxHighlightAssembly::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(dir);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + dir.length())) {
-                wxTextAttr dirAttr(wxColour(255, 102, 0));
-                textCtrl->SetStyle(pos, pos + dir.length(), dirAttr);
-                highlightRange.Mark(pos, pos + dir.length());
-            }
+            wxTextAttr dirAttr(wxColour(255, 102, 0));
+            textCtrl->SetStyle(pos, pos + dir.length(), dirAttr);
             pos = text.find(dir, pos + 1);
         }
     }

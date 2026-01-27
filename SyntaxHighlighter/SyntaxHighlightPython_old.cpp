@@ -12,7 +12,6 @@
 void SyntaxHighlightPython::ApplyHighlight(wxTextCtrl* textCtrl)
 {
     wxString text = textCtrl->GetValue();
-    highlightRange.occupiedRanges.clear();
     wxTextAttr normal(*wxWHITE);
     textCtrl->SetStyle(0, text.length(), normal);
 
@@ -22,10 +21,7 @@ void SyntaxHighlightPython::ApplyHighlight(wxTextCtrl* textCtrl)
     for (const auto& tok : moduleTokens) {
         size_t pos = text.find(tok);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + tok.length())) {
-                textCtrl->SetStyle(pos, pos + tok.length(), moduleAttr);
-                highlightRange.Mark(pos, pos + tok.length());
-            }
+            textCtrl->SetStyle(pos, pos + tok.length(), moduleAttr);
             pos = text.find(tok, pos + 1);
         }
     }
@@ -36,10 +32,7 @@ void SyntaxHighlightPython::ApplyHighlight(wxTextCtrl* textCtrl)
     for (const auto& t : types) {
         size_t pos = text.find(t);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + t.length())) {
-                textCtrl->SetStyle(pos, pos + t.length(), typeAttr);
-                highlightRange.Mark(pos, pos + t.length());
-            }
+            textCtrl->SetStyle(pos, pos + t.length(), typeAttr);
             pos = text.find(t, pos + 1);
         }
     }
@@ -52,10 +45,7 @@ void SyntaxHighlightPython::ApplyHighlight(wxTextCtrl* textCtrl)
     for (const auto& f : builtins) {
         size_t pos = text.find(f);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + f.length())) {
-                textCtrl->SetStyle(pos, pos + f.length(), funcAttr);
-                highlightRange.Mark(pos, pos + f.length());
-            }
+            textCtrl->SetStyle(pos, pos + f.length(), funcAttr);
             pos = text.find(f, pos + 1);
         }
     }
@@ -68,10 +58,7 @@ void SyntaxHighlightPython::ApplyHighlight(wxTextCtrl* textCtrl)
     for (const auto& k : keywords) {
         size_t pos = text.find(k);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + k.length())) {
-                textCtrl->SetStyle(pos, pos + k.length(), kwAttr);
-                highlightRange.Mark(pos, pos + k.length());
-            }
+            textCtrl->SetStyle(pos, pos + k.length(), kwAttr);
             pos = text.find(k, pos + 1);
         }
     }
@@ -82,10 +69,7 @@ void SyntaxHighlightPython::ApplyHighlight(wxTextCtrl* textCtrl)
     for (const auto& cs : controlStructures) {
         size_t pos = text.find(cs);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + cs.length())) {
-                textCtrl->SetStyle(pos, pos + cs.length(), csAttr);
-                highlightRange.Mark(pos, pos + cs.length());
-            }
+            textCtrl->SetStyle(pos, pos + cs.length(), csAttr);
             pos = text.find(cs, pos + 1);
         }
     }
@@ -96,10 +80,7 @@ void SyntaxHighlightPython::ApplyHighlight(wxTextCtrl* textCtrl)
     for (const auto& l : literals) {
         size_t pos = text.find(l);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + l.length())) {
-                textCtrl->SetStyle(pos, pos + l.length(), litAttr);
-                highlightRange.Mark(pos, pos + l.length());
-            }
+            textCtrl->SetStyle(pos, pos + l.length(), litAttr);
             pos = text.find(l, pos + 1);
         }
     }
@@ -110,17 +91,12 @@ void SyntaxHighlightPython::ApplyHighlight(wxTextCtrl* textCtrl)
     for (const auto& delim : triple) {
         size_t pos = text.find(delim);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + delim.length())) {
-                size_t endPos = text.find(delim, pos + delim.length());
-                if (endPos != wxString::npos) {
-                    textCtrl->SetStyle((long)pos, (long)endPos + (long)delim.length(), stringAttr);
-                    highlightRange.Mark(pos, endPos + delim.length());
-                    pos = text.find(delim, endPos + delim.length());
-                } else {
-                    break;
-                }
+            size_t endPos = text.find(delim, pos + delim.length());
+            if (endPos != wxString::npos) {
+                textCtrl->SetStyle((long)pos, (long)endPos + (long)delim.length(), stringAttr);
+                pos = text.find(delim, endPos + delim.length());
             } else {
-                pos = text.find(delim, pos + 1);
+                break;
             }
         }
     }
@@ -130,21 +106,16 @@ void SyntaxHighlightPython::ApplyHighlight(wxTextCtrl* textCtrl)
     for (const auto& delim : stringDelimiters) {
         size_t pos = text.find(delim);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + 1)) {
-                size_t endPos = text.find(delim, pos + 1);
-                // basic escape handling
-                while (endPos != wxString::npos && endPos > 0 && text[endPos - 1] == '\\') {
-                    endPos = text.find(delim, endPos + 1);
-                }
-                if (endPos != wxString::npos) {
-                    textCtrl->SetStyle((long)pos, (long)endPos + 1, stringAttr);
-                    highlightRange.Mark(pos, endPos + 1);
-                    pos = text.find(delim, endPos + 1);
-                } else {
-                    break;
-                }
+            size_t endPos = text.find(delim, pos + 1);
+            // basic escape handling
+            while (endPos != wxString::npos && endPos > 0 && text[endPos - 1] == '\\') {
+                endPos = text.find(delim, endPos + 1);
+            }
+            if (endPos != wxString::npos) {
+                textCtrl->SetStyle((long)pos, (long)endPos + 1, stringAttr);
+                pos = text.find(delim, endPos + 1);
             } else {
-                pos = text.find(delim, pos + 1);
+                break;
             }
         }
     }
@@ -156,20 +127,14 @@ void SyntaxHighlightPython::ApplyHighlight(wxTextCtrl* textCtrl)
     for (const auto& op : operators_multi) {
         size_t p = text.find(op);
         while (p != wxString::npos) {
-            if (!highlightRange.IsOccupied(p, p + op.length())) {
-                textCtrl->SetStyle((long)p, (long)p + op.length(), opAttr);
-                highlightRange.Mark(p, p + op.length());
-            }
+            textCtrl->SetStyle((long)p, (long)p + op.length(), opAttr);
             p = text.find(op, p + 1);
         }
     }
     for (const auto& op : operators_single) {
         size_t p = text.find(op);
         while (p != wxString::npos) {
-            if (!highlightRange.IsOccupied(p, p + op.length())) {
-                textCtrl->SetStyle((long)p, (long)p + op.length(), opAttr);
-                highlightRange.Mark(p, p + op.length());
-            }
+            textCtrl->SetStyle((long)p, (long)p + op.length(), opAttr);
             p = text.find(op, p + 1);
         }
     }
@@ -180,10 +145,7 @@ void SyntaxHighlightPython::ApplyHighlight(wxTextCtrl* textCtrl)
     for (const auto& s : symbols) {
         size_t p = text.find(s);
         while (p != wxString::npos) {
-            if (!highlightRange.IsOccupied(p, p + s.length())) {
-                textCtrl->SetStyle((long)p, (long)p + s.length(), symAttr);
-                highlightRange.Mark(p, p + s.length());
-            }
+            textCtrl->SetStyle((long)p, (long)p + s.length(), symAttr);
             p = text.find(s, p + 1);
         }
     }
@@ -192,14 +154,9 @@ void SyntaxHighlightPython::ApplyHighlight(wxTextCtrl* textCtrl)
     wxTextAttr commentAttr(wxColour(128, 255, 170));
     size_t pos = text.find("#");
     while (pos != wxString::npos) {
-        if (!highlightRange.IsOccupied(pos, pos + 1)) {
-            size_t endPos = text.find("\n", pos);
-            if (endPos == wxString::npos) endPos = text.length();
-            textCtrl->SetStyle((long)pos, (long)endPos, commentAttr);
-            highlightRange.Mark(pos, endPos);
-            pos = text.find("#", endPos);
-        } else {
-            pos = text.find("#", pos + 1);
-        }
+        size_t endPos = text.find("\n", pos);
+        if (endPos == wxString::npos) endPos = text.length();
+        textCtrl->SetStyle((long)pos, (long)endPos, commentAttr);
+        pos = text.find("#", endPos);
     }
 }

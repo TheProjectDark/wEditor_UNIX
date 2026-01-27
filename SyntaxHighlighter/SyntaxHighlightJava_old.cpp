@@ -12,7 +12,6 @@
 void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
 {
     wxString text = textCtrl->GetValue();
-    highlightRange.occupiedRanges.clear();
     wxTextAttr normal (*wxWHITE);
     textCtrl->SetStyle(0, text.length(), normal);
 
@@ -24,11 +23,8 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(imp);;
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + imp.length())) {
-                wxTextAttr importAttr(wxColour(0, 128, 128));
-                textCtrl->SetStyle(pos, pos + imp.length(), importAttr);
-                highlightRange.Mark(pos, pos + imp.length());
-            }
+            wxTextAttr importAttr(wxColour(0, 128, 128));
+            textCtrl->SetStyle(pos, pos + imp.length(), importAttr);
             pos = text.find(imp, pos + 1);
         }
     }
@@ -41,11 +37,8 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(type);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + type.length())) {
-                wxTextAttr typeAttr(wxColour(51, 153, 255));
-                textCtrl->SetStyle(pos, pos + type.length(), typeAttr);
-                highlightRange.Mark(pos, pos + type.length());
-            }
+            wxTextAttr typeAttr(wxColour(51, 153, 255));
+            textCtrl->SetStyle(pos, pos + type.length(), typeAttr);
             pos = text.find(type, pos + 1);
         }
     }
@@ -58,11 +51,8 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(func);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + func.length())) {
-                wxTextAttr funcAttr(wxColour(128, 179, 255));
-                textCtrl->SetStyle(pos, pos + func.length(), funcAttr);
-                highlightRange.Mark(pos, pos + func.length());
-            }
+            wxTextAttr funcAttr(wxColour(128, 179, 255));
+            textCtrl->SetStyle(pos, pos + func.length(), funcAttr);
             pos = text.find(func, pos + 1);
         }
     }
@@ -75,11 +65,8 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(keyword);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + keyword.length())) {
-                wxTextAttr keywordAttr(wxColour(230, 0, 230));
-                textCtrl->SetStyle(pos, pos + keyword.length(), keywordAttr);
-                highlightRange.Mark(pos, pos + keyword.length());
-            }
+            wxTextAttr keywordAttr(wxColour(230, 0, 230));
+            textCtrl->SetStyle(pos, pos + keyword.length(), keywordAttr);
             pos = text.find(keyword, pos + 1); 
         }
     }
@@ -92,11 +79,8 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(am);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + am.length())) {
-                wxTextAttr amAttr(wxColour(107, 107, 255));
-                textCtrl->SetStyle(pos, pos + am.length(), amAttr);
-                highlightRange.Mark(pos, pos + am.length());
-            }
+            wxTextAttr amAttr(wxColour(107, 107, 255));
+            textCtrl->SetStyle(pos, pos + am.length(), amAttr);
             pos = text.find(am, pos + 1);
         }
     }
@@ -109,11 +93,8 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(literal);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + literal.length())) {
-                wxTextAttr litAttr(*wxRED);
-                textCtrl->SetStyle(pos, pos + literal.length(), litAttr);
-                highlightRange.Mark(pos, pos + literal.length());
-            }
+            wxTextAttr litAttr(*wxRED);
+            textCtrl->SetStyle(pos, pos + literal.length(), litAttr);
             pos = text.find(literal, pos + 1);
         }
     }
@@ -126,11 +107,8 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(delimiter);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + delimiter.length())) {
-                wxTextAttr stringAttr(wxColour(255, 140, 0));
-                textCtrl->SetStyle(pos, pos + delimiter.length(), stringAttr);
-                highlightRange.Mark(pos, pos + delimiter.length());
-            }
+            wxTextAttr stringAttr(wxColour(255, 140, 0));
+            textCtrl->SetStyle(pos, pos + delimiter.length(), stringAttr);
             pos = text.find(delimiter, pos + 1);
         }
     }
@@ -146,11 +124,8 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(op);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + op.length())) {
-                wxTextAttr opAttr(wxColour(255, 0, 0));
-                textCtrl->SetStyle(pos, pos + op.length(), opAttr);
-                highlightRange.Mark(pos, pos + op.length());
-            }
+            wxTextAttr opAttr(wxColour(255, 0, 0));
+            textCtrl->SetStyle(pos, pos + op.length(), opAttr);
             pos = text.find(op, pos + 1);
         }
     }
@@ -158,11 +133,8 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(op);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + op.length())) {
-                wxTextAttr opAttr(wxColour(255, 0, 0));
-                textCtrl->SetStyle(pos, pos + op.length(), opAttr);
-                highlightRange.Mark(pos, pos + op.length());
-            }
+            wxTextAttr opAttr(wxColour(255, 0, 0));
+            textCtrl->SetStyle(pos, pos + op.length(), opAttr);
             pos = text.find(op, pos + 1);
         }
     }
@@ -175,11 +147,8 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
     {
         size_t pos = text.find(sym);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + sym.length())) {
-                wxTextAttr symAttr(wxColour(255, 102, 204));
-                textCtrl->SetStyle(pos, pos + sym.length(), symAttr);
-                highlightRange.Mark(pos, pos + sym.length());
-            }
+            wxTextAttr symAttr(wxColour(255, 102, 204));
+            textCtrl->SetStyle(pos, pos + sym.length(), symAttr);
             pos = text.find(sym, pos + 1);
         }
     }
@@ -187,17 +156,12 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
     //comments
     size_t pos = text.find("//");
     while (pos != wxString::npos) {
-        if (!highlightRange.IsOccupied(pos, pos + 2)) {
-            size_t endPos = text.find("\n", pos);
-            if (endPos == wxString::npos) {
-                endPos = text.length();
-            }
-            wxTextAttr commentAttr(wxColour(128, 255, 170));
-            textCtrl->SetStyle(pos, endPos, commentAttr);
-            highlightRange.Mark(pos, endPos);
-            pos = text.find("//", endPos);
-        } else {
-            pos = text.find("//", pos + 1);
+        size_t endPos = text.find("\n", pos);
+        if (endPos == wxString::npos) {
+            endPos = text.length();
         }
+        wxTextAttr commentAttr(wxColour(128, 255, 170));
+        textCtrl->SetStyle(pos, endPos, commentAttr);
+        pos = text.find("//", endPos);
     }
 }

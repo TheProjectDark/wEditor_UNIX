@@ -157,7 +157,6 @@ void MainFrame::OnSave(wxCommandEvent& event)
 
     wxString path = saveFileDialog.GetPath();
     wxString content = textCtrl->GetValue();
-
     wxFile file;
     if (file.Open(path, wxFile::write))
     {
@@ -210,6 +209,8 @@ void MainFrame::OnOpen(wxCommandEvent& event)
         languageChoice->SetStringSelection("Python");
     } else if (ext == "asm" || ext == "s") {
         languageChoice->SetStringSelection("Assembly");
+    } else if (ext == "sql") {
+        languageChoice->SetStringSelection("SQL Script");
     } else {
         languageChoice->SetStringSelection("Text");
     }

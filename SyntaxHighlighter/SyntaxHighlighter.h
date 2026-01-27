@@ -10,12 +10,33 @@
 #pragma once
 #include <wx/wx.h>
 #include <vector>
+#include <set>
+
+class HighlightRange {
+public:
+    std::set<std::pair<size_t, size_t>> occupiedRanges;
+    
+    bool IsOccupied(size_t start, size_t end) const {
+        for (const auto& range : occupiedRanges) {
+            if (!(end <= range.first || start >= range.second)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    void Mark(size_t start, size_t end) {
+        occupiedRanges.insert({start, end});
+    }
+};
 
 class SyntaxHighlighter {
 public:
     virtual ~SyntaxHighlighter() = default;
     virtual void ApplyHighlight(wxTextCtrl* textCtrl) = 0;
     virtual wxString GetLanguageName() const = 0;
+protected:
+    HighlightRange highlightRange;
 };
 
 class HighlighterFactory {
