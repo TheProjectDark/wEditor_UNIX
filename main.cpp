@@ -247,7 +247,7 @@ void MainFrame::OnDropFiles(const wxArrayString& filenames)
 void MainFrame::OnAbout(wxCommandEvent& event)
 {
     wxMessageBox("wEditor is simple cross-platform and open-souce text editor written on C++ using wxWidgets framework.",
-                 "wEditor Alpha v1.2", wxOK | wxICON_INFORMATION);
+                 "wEditor beta v1", wxOK | wxICON_INFORMATION);
 }
 
 //ts closes the app
