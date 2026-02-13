@@ -172,12 +172,15 @@ void MainFrame::OnSave(wxCommandEvent& event)
 
 bool IsFileSupported(const wxString& filename) {
     wxString ext = filename.AfterLast('.').Lower();
-    std::vector<wxString> unsupportedFileFormats = {"docx", "xlsx", "pptx", "pdf", "exe", "dll"};
+    std::vector<wxString> unsupportedFileFormats = {"docx", "xlsx", "pptx", "pdf", "exe", "dll", "bin", "iso", "img",
+        "zip", "rar", "7z", "tar", "gz", "mp3", "wav", "flac", "ogg", "mp4", "avi", "mkv", "mov", "wmv", "flv", "webm",
+        "jpg", "jpeg", "png", "bmp", "gif", "svg", "psd", "ai", "eps", "ttf", "otf"};
     for (const auto& unsupported : unsupportedFileFormats) {
         if (ext == unsupported) return false;
     }
     return true;
 }
+
 //open file function
 void MainFrame::OnOpen(wxCommandEvent& event)
 {
