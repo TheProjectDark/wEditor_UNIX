@@ -170,6 +170,7 @@ void MainFrame::OnSave(wxCommandEvent& event)
     }
 }
 
+//protecting against unsupported file formats
 bool IsFileSupported(const wxString& filename) {
     wxString ext = filename.AfterLast('.').Lower();
     std::vector<wxString> unsupportedFileFormats = {"docx", "xlsx", "pptx", "pdf", "exe", "dll", "bin", "iso", "img",
@@ -199,7 +200,7 @@ void MainFrame::OnOpen(wxCommandEvent& event)
         return;
 
     wxString path = openFileDialog.GetPath();
-    if (!IsFileSupported(path)) {
+    if (!IsFileSupported(path)) { //check if file is supported
         wxMessageBox("wEditor does not support this file format. Please select a text or code file.", "Unsupported Format", wxOK | wxICON_WARNING);
         return;
     }
@@ -246,7 +247,7 @@ void MainFrame::OnDropFiles(const wxArrayString& filenames)
     if (filenames.GetCount() > 0)
     {
         wxString path = filenames[0];
-        if (!IsFileSupported(path)) {
+        if (!IsFileSupported(path)) { //check if file is supported
             wxMessageBox("wEditor does not support this file format. Please drop a text or code file.", "Unsupported Format", wxOK | wxICON_WARNING);
             return;
         }
