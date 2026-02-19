@@ -11,6 +11,11 @@
 #include <wx/filedlg.h>
 #include <wx/file.h>
 #include "Functions/MainFrame.h"
+#if defined(__WXOSX__)
+#include <objc/objc.h>
+#include <objc/message.h>
+#include <objc/runtime.h>
+#endif
 
 //app class to launch this fuckass editor
 class App : public wxApp
@@ -34,14 +39,48 @@ MainFrame::MainFrame(const wxString& title)
     SetBackgroundColour(darkBackground);
     SetForegroundColour(darkText);
     //just basically creating some shi
+    wxMenu *menuFile = new wxMenu;
+    menuFile->Append(wxID_OPEN);
+    menuFile->Append(wxID_SAVE);
+    menuFile->AppendSeparator();
+    menuFile->Append(wxID_EXIT);
+
     wxMenu *menuHelp = new wxMenu;
     menuHelp->Append(wxID_ABOUT);
 
     wxMenuBar *menuBar = new wxMenuBar;
+    menuBar->Append(menuFile, "&File");
     menuBar->Append(menuHelp, "&Help");
     SetMenuBar(menuBar);
 
     textCtrl = new wxTextCtrl(panel, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+    // On macOS, disable automatic smart quotes/dashes for the native NSTextView
+#if defined(__WXOSX__)
+    {
+        typedef id (*ObjcMsgSendID)(id, SEL);
+        typedef void (*ObjcMsgSendVoidBool)(id, SEL, BOOL);
+        ObjcMsgSendID msgSendID = (ObjcMsgSendID)objc_msgSend;
+        ObjcMsgSendVoidBool msgSendVoidBool = (ObjcMsgSendVoidBool)objc_msgSend;
+
+        void* handle = textCtrl->GetHandle();
+        if (handle) {
+            id nsView = (id)handle;
+            SEL selDocumentView = sel_getUid("documentView");
+            id docView = NULL;
+            if (selDocumentView) docView = msgSendID(nsView, selDocumentView);
+            id textView = docView ? docView : nsView;
+
+            SEL selSetQuote = sel_getUid("setAutomaticQuoteSubstitutionEnabled:");
+            SEL selSetDash = sel_getUid("setAutomaticDashSubstitutionEnabled:");
+            SEL selSetTextReplacement = sel_getUid("setAutomaticTextReplacementEnabled:");
+            if (textView) {
+                if (selSetQuote) msgSendVoidBool(textView, selSetQuote, NO);
+                if (selSetDash) msgSendVoidBool(textView, selSetDash, NO);
+                if (selSetTextReplacement) msgSendVoidBool(textView, selSetTextReplacement, NO);
+            }
+        }
+    }
+#endif
     wxButton* save = new wxButton(panel, wxID_ANY, "Save");
     wxButton* open = new wxButton(panel, wxID_ANY, "Open");
 
@@ -103,6 +142,9 @@ MainFrame::MainFrame(const wxString& title)
         }
         evt.Skip();
     });
+    Bind(wxEVT_MENU, &MainFrame::OnOpen, this, wxID_OPEN);
+    Bind(wxEVT_MENU, &MainFrame::OnSave, this, wxID_SAVE);
+    Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_TEXT, &MainFrame::OnText, this);
 }
@@ -121,8 +163,15 @@ bool App::OnInit() {
     MainFrame* mainFrame = new MainFrame("wEditor");
     mainFrame->SetClientSize(mainFrame->FromDIP(wxSize(800, 600)));
     mainFrame->Show();
+    wxTheApp->Yield();  // Process pending events to ensure UI is ready
+
+    if (argc > 1) {
+        mainFrame->OpenFile(argv[1]);
+    }
     return true;
 }
+
+
 
 //syntax highlight functions
 void MainFrame::OnText(wxCommandEvent& event) {
@@ -140,22 +189,48 @@ void MainFrame::HighlightSyntax() {
     }
 }
 
+wxString MainFrame::GetLanguageForExtension(const wxString& filename) const {
+    wxString ext = filename.AfterLast('.').Lower();
+    if (ext == "cpp" || ext == "h" || ext == "hpp") {
+        return "C++";
+    } else if (ext == "c") {
+        return "C";
+    } else if (ext == "java" || ext == "jav" || ext == "class") {
+        return "Java";
+    } else if (ext == "py") {
+        return "Python";
+    } else if (ext == "asm" || ext == "s") {
+        return "Assembly";
+    } else if (ext == "sql") {
+        return "SQL Script";
+    } else {
+        return "Text";
+    }
+}
+
 //save file function
 void MainFrame::OnSave(wxCommandEvent& event)
 {
-    wxFileDialog saveFileDialog(
-        this,
-        "Save file",
-        "",
-        "",
-        "Text & Code files (*.txt;*.cpp;*.h;*.hpp;*.c;*.json;*.md;*.ini)|*.txt;*.cpp;*.h;*.hpp;*.c;*.json;*.md;*.ini|All files (*.*)|*.*",
-        wxFD_SAVE | wxFD_OVERWRITE_PROMPT
-    );
+    wxString path;
+    if (!currentFilePath.IsEmpty()) {
+        path = currentFilePath;
+    } else {
+        wxFileDialog saveFileDialog(
+            this,
+            "Save file",
+            "",
+            "",
+            "Text & Code files (*.txt;*.cpp;*.h;*.hpp;*.c;*.json;*.md;*.ini)|*.txt;*.cpp;*.h;*.hpp;*.c;*.json;*.md;*.ini|All files (*.*)|*.*",
+            wxFD_SAVE | wxFD_OVERWRITE_PROMPT
+        );
 
-    if (saveFileDialog.ShowModal() == wxID_CANCEL)
-        return;
+        if (saveFileDialog.ShowModal() == wxID_CANCEL)
+            return;
 
-    wxString path = saveFileDialog.GetPath();
+        path = saveFileDialog.GetPath();
+        currentFilePath = path;  // set current file path
+    }
+
     wxString content = textCtrl->GetValue();
     wxFile file;
     if (file.Open(path, wxFile::write))
@@ -180,6 +255,41 @@ bool IsFileSupported(const wxString& filename) {
         if (ext == unsupported) return false;
     }
     return true;
+}
+
+//open associated file function, it also applies syntax highlighting according to file type
+void MainFrame::OpenFile(const wxString& path)
+{
+    wxString fullPath = path;
+    if (!wxIsAbsolutePath(fullPath)) {
+        fullPath = wxGetCwd() + wxFILE_SEP_PATH + fullPath;
+    }
+
+    if (!IsFileSupported(fullPath)) { //check if file is supported
+        wxMessageBox("wEditor does not support this file format. Please select a text or code file.", "Unsupported Format", wxOK | wxICON_WARNING);
+        return;
+    }
+    wxFile file;
+    if (!file.Open(fullPath))
+    {
+        wxMessageBox(wxString::Format("Failed to open file: %s", fullPath), "Error");
+        return;
+    }
+
+    wxString text;
+    file.ReadAll(&text);
+    file.Close();
+
+    textCtrl->SetValue(text);
+    textCtrl->Refresh();
+    currentFilePath = fullPath;
+    //applying syntax highlighting according to file type
+    languageChoice->SetStringSelection(GetLanguageForExtension(fullPath));
+
+    delete currentHighlighter;
+    currentLanguage = languageChoice->GetStringSelection();
+    currentHighlighter = HighlighterFactory::CreateHighlighter(currentLanguage);
+    HighlightSyntax();
 }
 
 //open file function
@@ -217,23 +327,10 @@ void MainFrame::OnOpen(wxCommandEvent& event)
     file.Close();
 
     textCtrl->SetValue(text);
+    textCtrl->Refresh();
+    currentFilePath = path;
     //applying syntax highlighting according to file type
-    wxString ext = openFileDialog.GetFilename().AfterLast('.');
-    if (ext == "cpp" || ext == "h" || ext == "hpp" ) {
-        languageChoice->SetStringSelection("C++");
-    } else if (ext == "c") {
-        languageChoice->SetStringSelection("C");
-    } else if (ext == "java" || ext == "jav" || ext == "class") {
-        languageChoice->SetStringSelection("Java");
-    } else if (ext == "py") {
-        languageChoice->SetStringSelection("Python");
-    } else if (ext == "asm" || ext == "s") {
-        languageChoice->SetStringSelection("Assembly");
-    } else if (ext == "sql") {
-        languageChoice->SetStringSelection("SQL Script");
-    } else {
-        languageChoice->SetStringSelection("Text");
-    }
+    languageChoice->SetStringSelection(GetLanguageForExtension(path));
 
     delete currentHighlighter;
     currentLanguage = languageChoice->GetStringSelection();
@@ -263,6 +360,13 @@ void MainFrame::OnDropFiles(const wxArrayString& filenames)
         file.Close();
 
         textCtrl->SetValue(text);
+        textCtrl->Refresh();
+        //applying syntax highlighting according to file type
+        languageChoice->SetStringSelection(GetLanguageForExtension(path));
+
+        delete currentHighlighter;
+        currentLanguage = languageChoice->GetStringSelection();
+        currentHighlighter = HighlighterFactory::CreateHighlighter(currentLanguage);
         HighlightSyntax();
     }
 }

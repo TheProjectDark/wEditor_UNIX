@@ -19,12 +19,14 @@ class MainFrame : public wxFrame
         MainFrame(const wxString& title);
         ~MainFrame();
         void OnDropFiles(const wxArrayString& filenames);
+        void OpenFile(const wxString& path);
 
     private:
         wxTextCtrl* textCtrl;
         wxChoice* languageChoice;
         SyntaxHighlighter* currentHighlighter;
         wxString currentLanguage;
+        wxString currentFilePath;
 
         void OnExit(wxCommandEvent& event);
         void OnAbout(wxCommandEvent& event);
@@ -33,4 +35,5 @@ class MainFrame : public wxFrame
         void OnText(wxCommandEvent& event);
         void OnLanguageChange(wxCommandEvent& event);
         void HighlightSyntax();
+        wxString GetLanguageForExtension(const wxString& filename) const;
 };
