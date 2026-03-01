@@ -105,6 +105,56 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         }
     }
 
+    //highlighting for functions, methods and procedures
+    std::vector<wxString> controlStatements = {
+        "if", "while", "for", "switch", "catch"
+    };
+    size_t pos = text.find("(");
+    while (pos != wxString::npos) {
+        if (!highlightRange.IsOccupied(pos, pos + 1)) {
+            //Check if this is a control statement
+            bool isControlStatement = false;
+            for (const auto& stmt : controlStatements) {
+                size_t checkPos = pos;
+                //Skip backwards over whitespace
+                while (checkPos > 0 && (text[checkPos - 1] == ' ' || text[checkPos - 1] == '\t')) {
+                    checkPos--;
+                }
+                //Check if the keyword is there
+                if (checkPos >= stmt.length() && 
+                    text.substr(checkPos - stmt.length(), stmt.length()) == stmt &&
+                    (checkPos == stmt.length() || !isalnum(text[checkPos - stmt.length() - 1]))) {
+                    isControlStatement = true;
+                    break;
+                }
+            }
+            
+            if (!isControlStatement) {
+                //Finding the start of the functions name
+                size_t nameEnd = pos;
+                size_t nameStart = pos;
+                
+                //Move backwards to find the start of identifier
+                while (nameStart > 0) {
+                    char ch = text[nameStart - 1];
+                    if (isalnum(ch) || ch == '_' || ch == ':') {
+                        nameStart--;
+                    } else {
+                        break;
+                    }
+                }
+                
+                //Only highlight if we found a valid name
+                if (nameStart < nameEnd) {
+                    wxTextAttr funcAttr(wxColour(128, 179, 255));
+                    textCtrl->SetStyle(nameStart, pos, funcAttr);
+                    highlightRange.Mark(nameStart, pos);
+                }
+            }
+        }
+        pos = text.find("(", pos + 1);
+    }
+
     //types
     std::vector<wxString> types = {
         "int", "float", "double", "char", "void", "bool", "long", "short", "unsigned", "signed", "std::string", "std::vector", "std::map", "string", "class"
