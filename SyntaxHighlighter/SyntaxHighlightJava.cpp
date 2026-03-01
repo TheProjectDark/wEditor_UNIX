@@ -33,6 +33,50 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
         }
     }
 
+    //highlighting for functions, methods and procedures
+    std::vector<wxString> controlStatements = {
+        "if", "else if", "while", "for", "switch", "catch"
+    };
+    size_t pos = text.find("(");
+    while (pos != wxString::npos) {
+        if (!highlightRange.IsOccupied(pos, pos + 1)) {
+            bool isControlStatement = false;
+            for (const auto& stmt : controlStatements) {
+                size_t checkPos = pos;
+                while (checkPos > 0 && (text[checkPos - 1] == ' ' || text[checkPos - 1] == '\t')) {
+                    checkPos--;
+                }
+                if (checkPos >= stmt.length() && 
+                    text.substr(checkPos - stmt.length(), stmt.length()) == stmt &&
+                    (checkPos == stmt.length() || !isalnum(text[checkPos - stmt.length() - 1]))) {
+                    isControlStatement = true;
+                    break;
+                }
+            }
+
+            if (!isControlStatement) {
+                size_t nameEnd = pos;
+                size_t nameStart = pos;
+
+                while (nameStart > 0) {
+                    char ch = text[nameStart -1];
+                    if (isalnum(ch) || ch == '_' || ch == ':') {
+                        nameStart--;
+                    } else {
+                        break;
+                    }
+                }
+
+                if (nameStart < nameEnd) {
+                    wxTextAttr funcAttr(wxColour(128, 179, 255));
+                    textCtrl->SetStyle(nameStart, pos, funcAttr);
+                    highlightRange.Mark(nameStart, pos);
+                }
+            }
+        }
+        pos = text.find("(", pos + 1);
+    }
+
     //types
     std::vector<wxString> types = {
         "int", "float", "double", "char", "void", "boolean", "long", "short", "byte", "String", "class", "interface"
@@ -184,20 +228,30 @@ void SyntaxHighlightJava::ApplyHighlight(wxTextCtrl* textCtrl)
         }
     }
 
-    //comments
-    size_t pos = text.find("//");
-    while (pos != wxString::npos) {
-        if (!highlightRange.IsOccupied(pos, pos + 2)) {
-            size_t endPos = text.find("\n", pos);
-            if (endPos == wxString::npos) {
-                endPos = text.length();
+    // Comments
+    std::vector<wxString> comments = {
+        "//", "/*", "*/"
+    };
+    for (const auto& comment : comments)
+    {
+        size_t pos = text.find(comment);
+        while (pos != wxString::npos) {
+            size_t endPos;
+            if (comment == "//") {
+                endPos = text.find("\n", pos);
+                if (endPos == wxString::npos) endPos = text.length();
+            } else if (comment == "/*") {
+                endPos = text.find("*/", pos);
+                if (endPos != wxString::npos) endPos += 2;
+                else endPos = text.length();
+            } else {
+                pos = text.find(comment, pos + 1);
+                continue;
             }
             wxTextAttr commentAttr(wxColour(128, 255, 170));
             textCtrl->SetStyle(pos, endPos, commentAttr);
             highlightRange.Mark(pos, endPos);
-            pos = text.find("//", endPos);
-        } else {
-            pos = text.find("//", pos + 1);
+            pos = text.find(comment, endPos);
         }
     }
 }

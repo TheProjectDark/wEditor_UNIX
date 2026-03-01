@@ -8,6 +8,7 @@
  */
 
 #include "SyntaxHighlighter.h"
+#include "Text.h"
 #include "SyntaxHighlightCPP.h"
 #include "SyntaxHighlightC.h"
 #include "SyntaxHighlightJava.h"
@@ -17,7 +18,7 @@
 
 SyntaxHighlighter* HighlighterFactory::CreateHighlighter(const wxString& language) {
     if (language == "Text") {
-        return nullptr;
+        return new Text();
     }
     else if (language == "C++") {
         return new SyntaxHighlightCPP();

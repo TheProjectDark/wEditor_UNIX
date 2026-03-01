@@ -18,7 +18,6 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
     wxTextAttr normal(*wxWHITE);
     textCtrl->SetStyle(0, text.length(), normal);
 
-    // First pass: mark strings and comments (highest priority)
     // Comments
     std::vector<wxString> comments = {
         "//", "/*", "*/"
@@ -107,7 +106,7 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
 
     //highlighting for functions, methods and procedures
     std::vector<wxString> controlStatements = {
-        "if", "while", "for", "switch", "catch"
+        "if", "else if", "while", "for", "switch", "catch"
     };
     size_t pos = text.find("(");
     while (pos != wxString::npos) {
