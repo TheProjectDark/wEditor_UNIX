@@ -51,8 +51,6 @@ MainFrame::MainFrame(const wxString& title)
     SetMenuBar(menuBar);
 
     textCtrl = new wxStyledTextCtrl(panel, wxID_ANY);
-    
-    // Setup dark theme using Theme Settings
     ThemeSettings::ApplyDarkTheme(textCtrl);
     
     wxButton* save = new wxButton(panel, wxID_ANY, "Save");
@@ -140,11 +138,23 @@ bool App::OnInit() {
     return true;
 }
 
+void UpdateLineNumberMargin(wxStyledTextCtrl* textCtrl)
+{
+    int lineCount = textCtrl->GetLineCount();
+    int digits = std::to_string(lineCount).length();
 
+    int width = textCtrl->TextWidth(
+        wxSTC_STYLE_LINENUMBER,
+        std::string(digits, '9')
+    );
+
+    textCtrl->SetMarginWidth(0, width + 10);
+}
 
 //syntax highlight functions
 void MainFrame::OnText(wxCommandEvent& event) {
     HighlightSyntax();
+    UpdateLineNumberMargin(textCtrl);
 }
 void MainFrame::OnLanguageChange(wxCommandEvent& event) {
     currentLanguage = languageChoice->GetStringSelection();

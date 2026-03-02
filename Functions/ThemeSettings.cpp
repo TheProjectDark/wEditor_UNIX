@@ -1,4 +1,11 @@
-//theme for editor
+/*
+ * wEditor
+ * Copyright (C) 2026 TheProjectDark
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ */
 
 #include "ThemeSettings.h"
 
@@ -19,81 +26,94 @@ wxColour ThemeSettings::GetButtonBackgroundColour()
 
 void ThemeSettings::ApplyDarkTheme(wxStyledTextCtrl* textCtrl)
 {
-    //set background and caret
-    textCtrl->SetBackgroundColour(GetBackgroundColour());
-    textCtrl->SetCaretForeground(GetTextColour());
-    
-    //set selection background
-    textCtrl->SetSelBackground(true, wxColour(60, 60, 90));
-    textCtrl->SetSelForeground(true, GetTextColour());
-    
-    //set font
-    wxFont font(FONT_SIZE, FONT_FAMILY, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-    
-    //set default style
-    textCtrl->StyleSetFont(STYLE_DEFAULT, font);
-    textCtrl->StyleSetForeground(STYLE_DEFAULT, GetTextColour());
-    textCtrl->StyleSetBackground(STYLE_DEFAULT, GetBackgroundColour());
-    
-    //set comment style
-    textCtrl->StyleSetFont(STYLE_COMMENT, font);
-    textCtrl->StyleSetForeground(STYLE_COMMENT, wxColour(COMMENT_RED, COMMENT_GREEN, COMMENT_BLUE));
-    textCtrl->StyleSetBackground(STYLE_COMMENT, GetBackgroundColour());
-    
-    //set string style
-    textCtrl->StyleSetFont(STYLE_STRING, font);
-    textCtrl->StyleSetForeground(STYLE_STRING, wxColour(STRING_RED, STRING_GREEN, STRING_BLUE));
-    textCtrl->StyleSetBackground(STYLE_STRING, GetBackgroundColour());
-    
-    //set keyword style
-    textCtrl->StyleSetFont(STYLE_KEYWORD, font);
-    textCtrl->StyleSetForeground(STYLE_KEYWORD, wxColour(KEYWORD_RED, KEYWORD_GREEN, KEYWORD_BLUE));
-    textCtrl->StyleSetBackground(STYLE_KEYWORD, GetBackgroundColour());
-    textCtrl->StyleSetBold(STYLE_KEYWORD, true);
-    
-    //set preprocessor style
-    textCtrl->StyleSetFont(STYLE_PREPROCESSOR, font);
-    textCtrl->StyleSetForeground(STYLE_PREPROCESSOR, wxColour(PREPROCESSOR_RED, PREPROCESSOR_GREEN, PREPROCESSOR_BLUE));
-    textCtrl->StyleSetBackground(STYLE_PREPROCESSOR, GetBackgroundColour());
-    
-    //set namespace style
-    textCtrl->StyleSetFont(STYLE_NAMESPACE, font);
-    textCtrl->StyleSetForeground(STYLE_NAMESPACE, wxColour(NAMESPACE_RED, NAMESPACE_GREEN, NAMESPACE_BLUE));
-    textCtrl->StyleSetBackground(STYLE_NAMESPACE, GetBackgroundColour());
-    
-    //set number style
-    textCtrl->StyleSetFont(STYLE_NUMBER, font);
-    textCtrl->StyleSetForeground(STYLE_NUMBER, wxColour(NUMBER_RED, NUMBER_GREEN, NUMBER_BLUE));
-    textCtrl->StyleSetBackground(STYLE_NUMBER, GetBackgroundColour());
-    
-    //set operator style
-    textCtrl->StyleSetFont(STYLE_OPERATOR, font);
-    textCtrl->StyleSetForeground(STYLE_OPERATOR, wxColour(OPERATOR_RED, OPERATOR_GREEN, OPERATOR_BLUE));
-    textCtrl->StyleSetBackground(STYLE_OPERATOR, GetBackgroundColour());
-    
-    //set function style
-    textCtrl->StyleSetFont(STYLE_FUNCTION, font);
-    textCtrl->StyleSetForeground(STYLE_FUNCTION, wxColour(FUNCTION_RED, FUNCTION_GREEN, FUNCTION_BLUE));
-    textCtrl->StyleSetBackground(STYLE_FUNCTION, GetBackgroundColour());
-    
-    //remove line numbers
-    textCtrl->SetMarginWidth(0, 0);
-    
-    //set margin background
-    textCtrl->SetMarginBackground(0, GetBackgroundColour());
-    textCtrl->SetMarginBackground(1, GetBackgroundColour());
-    textCtrl->SetMarginBackground(2, GetBackgroundColour());
-    textCtrl->SetFoldMarginColour(true, GetBackgroundColour());
-    textCtrl->SetFoldMarginHiColour(true, GetBackgroundColour());
+    wxColour bg(38, 38, 38);
+    wxColour fg(220, 220, 220);
 
-    //hide whitespace and eol markers
+    wxFont font(FONT_SIZE, FONT_FAMILY, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+
+    //default style
+    textCtrl->StyleSetFont(wxSTC_STYLE_DEFAULT, font);
+    textCtrl->StyleSetForeground(wxSTC_STYLE_DEFAULT, fg);
+    textCtrl->StyleSetBackground(wxSTC_STYLE_DEFAULT, bg);
+
+    textCtrl->StyleClearAll(); //apply default style to all styles
+
+    //caret
+    textCtrl->SetCaretForeground(fg);
+
+    //selection
+    textCtrl->SetSelBackground(true, wxColour(60, 60, 90));
+    textCtrl->SetSelForeground(true, fg);
+
+    //linenumbers
+    textCtrl->StyleSetForeground(wxSTC_STYLE_LINENUMBER, wxColour(120,120,120));
+    textCtrl->StyleSetBackground(wxSTC_STYLE_LINENUMBER, wxColour(32, 32, 32));
+
+    //margins
+    textCtrl->SetMarginType(0, wxSTC_MARGIN_NUMBER);
+    textCtrl->SetMarginType(1, wxSTC_MARGIN_SYMBOL);
+    textCtrl->SetMarginWidth(0, 40); 
+
+    for (int i = 0; i < 3; i++)
+        textCtrl->SetMarginBackground(i, bg);
+
+    textCtrl->SetFoldMarginColour(true, bg);
+    textCtrl->SetFoldMarginHiColour(true, bg);
+
+    //--SYNTAX HIGHLIGHTING STYLES--
+    //comment
+    textCtrl->StyleSetFont(STYLE_COMMENT, font);
+    textCtrl->StyleSetForeground(STYLE_COMMENT,
+        wxColour(COMMENT_RED, COMMENT_GREEN, COMMENT_BLUE));
+    textCtrl->StyleSetBackground(STYLE_COMMENT, bg);
+
+    //string
+    textCtrl->StyleSetFont(STYLE_STRING, font);
+    textCtrl->StyleSetForeground(STYLE_STRING,
+        wxColour(STRING_RED, STRING_GREEN, STRING_BLUE));
+    textCtrl->StyleSetBackground(STYLE_STRING, bg);
+
+    //keyword
+    textCtrl->StyleSetFont(STYLE_KEYWORD, font);
+    textCtrl->StyleSetForeground(STYLE_KEYWORD,
+        wxColour(KEYWORD_RED, KEYWORD_GREEN, KEYWORD_BLUE));
+    textCtrl->StyleSetBackground(STYLE_KEYWORD, bg);
+    textCtrl->StyleSetBold(STYLE_KEYWORD, true);
+
+    //preprocessor
+    textCtrl->StyleSetFont(STYLE_PREPROCESSOR, font);
+    textCtrl->StyleSetForeground(STYLE_PREPROCESSOR,
+        wxColour(PREPROCESSOR_RED, PREPROCESSOR_GREEN, PREPROCESSOR_BLUE));
+    textCtrl->StyleSetBackground(STYLE_PREPROCESSOR, bg);
+
+    //namespace
+    textCtrl->StyleSetFont(STYLE_NAMESPACE, font);
+    textCtrl->StyleSetForeground(STYLE_NAMESPACE,
+        wxColour(NAMESPACE_RED, NAMESPACE_GREEN, NAMESPACE_BLUE));
+    textCtrl->StyleSetBackground(STYLE_NAMESPACE, bg);
+
+    //number
+    textCtrl->StyleSetFont(STYLE_NUMBER, font);
+    textCtrl->StyleSetForeground(STYLE_NUMBER,
+        wxColour(NUMBER_RED, NUMBER_GREEN, NUMBER_BLUE));
+    textCtrl->StyleSetBackground(STYLE_NUMBER, bg);
+
+    //operator
+    textCtrl->StyleSetFont(STYLE_OPERATOR, font);
+    textCtrl->StyleSetForeground(STYLE_OPERATOR,
+        wxColour(OPERATOR_RED, OPERATOR_GREEN, OPERATOR_BLUE));
+    textCtrl->StyleSetBackground(STYLE_OPERATOR, bg);
+
+    //function
+    textCtrl->StyleSetFont(STYLE_FUNCTION, font);
+    textCtrl->StyleSetForeground(STYLE_FUNCTION,
+        wxColour(FUNCTION_RED, FUNCTION_GREEN, FUNCTION_BLUE));
+    textCtrl->StyleSetBackground(STYLE_FUNCTION, bg);
+
+    //misc
     textCtrl->SetViewWhiteSpace(wxSTC_WS_INVISIBLE);
     textCtrl->SetViewEOL(false);
-
-    //disable caret line and two-phase draw
     textCtrl->SetCaretLineVisible(false);
     textCtrl->SetTwoPhaseDraw(false);
-
-    //enable wrapping
     textCtrl->SetWrapMode(wxSTC_WRAP_WORD);
 }
