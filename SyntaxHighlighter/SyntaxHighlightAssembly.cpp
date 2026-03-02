@@ -9,110 +9,103 @@
 
 #include "SyntaxHighlightAssembly.h"
 
-void SyntaxHighlightAssembly::ApplyHighlight(wxTextCtrl* textCtrl)
+void SyntaxHighlightAssembly::ApplyHighlight(wxStyledTextCtrl* textCtrl)
 {
     wxString text = textCtrl->GetValue();
+    int length = text.length();
+    
+    //skip highlight for empty text
+    if (length == 0) return;
+    
     highlightRange.occupiedRanges.clear();
 
-    wxTextAttr normal (*wxWHITE);
-    textCtrl->SetStyle(0, text.length(), normal);
+    std::string styles(length, STYLE_DEFAULT);
 
-    //assembly instructions
+    // Comments
+    size_t pos = text.find(";");
+    while (pos != wxString::npos) {
+        if (!highlightRange.IsOccupied(pos, pos + 1)) {
+            size_t endPos = text.find("\n", pos);
+            if (endPos == wxString::npos) endPos = text.length();
+            for (size_t i = pos; i < endPos; i++) {
+                styles[i] = STYLE_COMMENT;
+            }
+            highlightRange.Mark(pos, endPos);
+            pos = text.find(";", endPos);
+        } else {
+            pos = text.find(";", pos + 1);
+        }
+    }
+
+    // Assembly instructions
     std::vector<wxString> instructions = {
-        "mov", "add", "sub", "mul", "div", "jmp", "cmp", "je", "jne", "call", "ret", "push", "pop", "jg", "jl", "jge", "jle", "and", "or", "xor", "not", "shl", "shr", "lea", "int", "nop", "add"
+        "mov", "add", "sub", "mul", "div", "jmp", "cmp", "je", "jne", "call", "ret",
+        "push", "pop", "jg", "jl", "jge", "jle", "and", "or", "xor", "not", "shl", "shr",
+        "lea", "int", "nop"
     };
-
-    for (const auto& instr : instructions)
-    {
-        size_t pos = text.find(instr);
+    for (const auto& instr : instructions) {
+        pos = text.find(instr);
         while (pos != wxString::npos) {
             if (!highlightRange.IsOccupied(pos, pos + instr.length())) {
-                wxTextAttr instrAttr(wxColour(0, 153, 51));
-                textCtrl->SetStyle(pos, pos + instr.length(), instrAttr);
+                for (size_t i = pos; i < pos + instr.length(); i++) {
+                    styles[i] = STYLE_KEYWORD;
+                }
                 highlightRange.Mark(pos, pos + instr.length());
             }
             pos = text.find(instr, pos + 1);
         }
     }
 
-    //assembly registers
+    // Registers
     std::vector<wxString> registers = {
         "eax", "ebx", "ecx", "edx", "esi", "edi", "esp", "ebp",
         "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rsp", "rbp",
         "ax", "bx", "cx", "dx", "si", "di", "sp", "bp",
         "al", "bl", "cl", "dl"
     };
-
-    for (const auto& reg : registers)
-    {
-        size_t pos = text.find(reg);
+    for (const auto& reg : registers) {
+        pos = text.find(reg);
         while (pos != wxString::npos) {
             if (!highlightRange.IsOccupied(pos, pos + reg.length())) {
-                wxTextAttr regAttr(wxColour(0, 102, 204));
-                textCtrl->SetStyle(pos, pos + reg.length(), regAttr);
+                for (size_t i = pos; i < pos + reg.length(); i++) {
+                    styles[i] = STYLE_NAMESPACE;
+                }
                 highlightRange.Mark(pos, pos + reg.length());
             }
             pos = text.find(reg, pos + 1);
         }
     }
 
-    //comments
-    size_t commentPos = text.find(";");
-    while (commentPos != wxString::npos) {
-        if (!highlightRange.IsOccupied(commentPos, commentPos + 1)) {
-            wxTextAttr commentAttr(wxColour(128, 128, 128));
-            textCtrl->SetStyle(commentPos, text.length(), commentAttr);
-            highlightRange.Mark(commentPos, text.length());
-            commentPos = text.find(";", commentPos + 1);
-        } else {
-            commentPos = text.find(";", commentPos + 1);
-        }
-    }
-
-    //numbers
-    for (size_t i = 0; i < text.length(); ++i) {
-        if (wxIsdigit(text[i])) {
-            if (!highlightRange.IsOccupied(i, i + 1)) {
-                size_t start = i;
-                while (i < text.length() && wxIsdigit(text[i])) {
-                    ++i;
-                }
-                wxTextAttr numberAttr(wxColour(204, 0, 204));
-                textCtrl->SetStyle(start, i, numberAttr);
-                highlightRange.Mark(start, i);
-            }
-        }
-    }
-
-    //labels
-    size_t labelPos = text.find(":");
-    while (labelPos != wxString::npos) {
-        if (!highlightRange.IsOccupied(labelPos, labelPos + 1)) {
-            size_t start = text.rfind('\n', labelPos);
-            if (start == wxString::npos) start = 0; else start += 1;
-            wxTextAttr labelAttr(wxColour(255, 153, 0));
-            textCtrl->SetStyle(start, labelPos + 1, labelAttr);
-            highlightRange.Mark(start, labelPos + 1);
-            labelPos = text.find(":", labelPos + 1);
-        } else {
-            labelPos = text.find(":", labelPos + 1);
-        }
-    }
-
-    //directives
-    std::vector<wxString> directives = {
-        ".data", ".text", ".bss", ".globl", ".section", ".align", ".byte", ".word", ".long", ".quad", ".asciz"
-    };
-    for (const auto& dir : directives)
-    {
-        size_t pos = text.find(dir);
+    // Symbols and operators
+    std::vector<wxString> symbols = {":", ",", "[", "]", "+", "-", "*"};
+    for (const auto& symbol : symbols) {
+        pos = text.find(symbol);
         while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + dir.length())) {
-                wxTextAttr dirAttr(wxColour(255, 102, 0));
-                textCtrl->SetStyle(pos, pos + dir.length(), dirAttr);
-                highlightRange.Mark(pos, pos + dir.length());
+            if (!highlightRange.IsOccupied(pos, pos + 1)) {
+                styles[pos] = STYLE_OPERATOR;
+                highlightRange.Mark(pos, pos + 1);
             }
-            pos = text.find(dir, pos + 1);
+            pos = text.find(symbol, pos + 1);
         }
     }
+
+    // Labels (text followed by :)
+    for (int i = 0; i < length; i++) {
+        if ((isalpha(text[i]) || text[i] == '_') && (i == 0 || text[i-1] == '\n')) {
+            size_t j = i;
+            while (j < (size_t)length && (isalnum(text[j]) || text[j] == '_')) {
+                j++;
+            }
+            if (j < (size_t)length && text[j] == ':' && !highlightRange.IsOccupied(i, j)) {
+                for (size_t k = i; k < j; k++) {
+                    styles[k] = STYLE_FUNCTION;
+                }
+                highlightRange.Mark(i, j);
+                i = j;
+            }
+        }
+    }
+    
+    // Apply all styles at once
+    textCtrl->SetStyleBytes(length, (char*)styles.c_str());
 }

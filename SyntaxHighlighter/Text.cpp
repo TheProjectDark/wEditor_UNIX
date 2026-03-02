@@ -7,14 +7,22 @@
  * (at your option) any later version.
  */
 
- #include "Text.h"
+#include "Text.h"
 
- void Text::ApplyHighlight(wxTextCtrl* textCtrl) {
+void Text::ApplyHighlight(wxStyledTextCtrl* textCtrl) {
     wxString text = textCtrl->GetValue();
+    int length = text.length();
+    
+    //skip highlight for empty text
+    if (length == 0) return;
     highlightRange.occupiedRanges.clear();
 
-    wxTextAttr normal(*wxWHITE);
-    textCtrl->SetStyle(0, text.length(), normal);
-    // For plain text, we won't do any actual syntax highlighting, but we can still mark the entire range as occupied to prevent any other highlighters from trying to style it.
+    highlightRange.occupiedRanges.clear();
+
+    //clear all styles for plain text
+    std::string styles(length, STYLE_DEFAULT);
+    textCtrl->SetStyleBytes(length, (char*)styles.c_str());
     highlightRange.Mark(0, text.length());
- }
+}
+
+

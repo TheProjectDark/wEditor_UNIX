@@ -8,37 +8,34 @@
  */
 
 #include <wx/wx.h>
+#include <wx/stc/stc.h>
 #include <wx/filedlg.h>
 #include <wx/file.h>
 #include "Functions/MainFrame.h"
-#if defined(__WXOSX__)
-#include <objc/objc.h>
-#include <objc/message.h>
-#include <objc/runtime.h>
-#endif
+#include "Functions/ThemeSettings.h"
 
-//app class to launch this fuckass editor
+//app class to launch this editor
 class App : public wxApp
 {
     public:
         bool OnInit();
 };
 
-//the main part of the code
+//main part of the code
 MainFrame::MainFrame(const wxString& title)
     : wxFrame(nullptr, wxID_ANY, title)
 {
     wxPanel* panel = new wxPanel(this);
-    //turning frame dark
-    wxColour darkBackground(30, 30, 30);
-    wxColour darkText(230, 230, 230);
+    //set dark theme
+    wxColour darkBackground = ThemeSettings::GetBackgroundColour();
+    wxColour darkText = ThemeSettings::GetTextColour();
     
     panel->SetBackgroundColour(darkBackground);
     panel->SetForegroundColour(darkText);
     
     SetBackgroundColour(darkBackground);
     SetForegroundColour(darkText);
-    //just basically creating some shi
+    //create menu
     wxMenu *menuFile = new wxMenu;
     menuFile->Append(wxID_OPEN);
     menuFile->Append(wxID_SAVE);
@@ -53,38 +50,15 @@ MainFrame::MainFrame(const wxString& title)
     menuBar->Append(menuHelp, "&Help");
     SetMenuBar(menuBar);
 
-    textCtrl = new wxTextCtrl(panel, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
-    // On macOS, disable automatic smart quotes/dashes for the native NSTextView
-#if defined(__WXOSX__)
-    {
-        typedef id (*ObjcMsgSendID)(id, SEL);
-        typedef void (*ObjcMsgSendVoidBool)(id, SEL, BOOL);
-        ObjcMsgSendID msgSendID = (ObjcMsgSendID)objc_msgSend;
-        ObjcMsgSendVoidBool msgSendVoidBool = (ObjcMsgSendVoidBool)objc_msgSend;
-
-        void* handle = textCtrl->GetHandle();
-        if (handle) {
-            id nsView = (id)handle;
-            SEL selDocumentView = sel_getUid("documentView");
-            id docView = NULL;
-            if (selDocumentView) docView = msgSendID(nsView, selDocumentView);
-            id textView = docView ? docView : nsView;
-
-            SEL selSetQuote = sel_getUid("setAutomaticQuoteSubstitutionEnabled:");
-            SEL selSetDash = sel_getUid("setAutomaticDashSubstitutionEnabled:");
-            SEL selSetTextReplacement = sel_getUid("setAutomaticTextReplacementEnabled:");
-            if (textView) {
-                if (selSetQuote) msgSendVoidBool(textView, selSetQuote, NO);
-                if (selSetDash) msgSendVoidBool(textView, selSetDash, NO);
-                if (selSetTextReplacement) msgSendVoidBool(textView, selSetTextReplacement, NO);
-            }
-        }
-    }
-#endif
+    textCtrl = new wxStyledTextCtrl(panel, wxID_ANY);
+    
+    // Setup dark theme using Theme Settings
+    ThemeSettings::ApplyDarkTheme(textCtrl);
+    
     wxButton* save = new wxButton(panel, wxID_ANY, "Save");
     wxButton* open = new wxButton(panel, wxID_ANY, "Open");
 
-    //enabling drag and drop
+    //enable drag and drop
     DragNDrop* dropTarget = new DragNDrop(this);
     textCtrl->SetDropTarget(dropTarget);
 
@@ -97,11 +71,7 @@ MainFrame::MainFrame(const wxString& title)
     languageChoice->SetSelection(0);
     currentHighlighter = HighlighterFactory::CreateHighlighter("Text");
     
-    //ts is for style or smth like that
-    textCtrl->SetBackgroundColour(wxColour(40, 40, 40));
-    textCtrl->SetForegroundColour(darkText);
-    
-    wxColour buttonBackground(110, 110, 110);
+    wxColour buttonBackground = ThemeSettings::GetButtonBackgroundColour();
     wxColour buttonForeground(255, 255, 255);
     
     save->SetBackgroundColour(buttonBackground);
@@ -111,7 +81,7 @@ MainFrame::MainFrame(const wxString& title)
     languageChoice->SetBackgroundColour(buttonBackground);
     languageChoice->SetForegroundColour(buttonForeground);
 
-    //below are all sizers
+    //setup sizers
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer* topSizer  = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -127,17 +97,16 @@ MainFrame::MainFrame(const wxString& title)
     mainSizer->SetSizeHints(this);
     languageChoice->SetMinSize(wxSize(140, -1));
 
-    //below are some bindings
+    //setup bindings
     save->Bind(wxEVT_BUTTON, &MainFrame::OnSave, this);
     open->Bind(wxEVT_BUTTON, &MainFrame::OnOpen, this);
     languageChoice->Bind(wxEVT_CHOICE, &MainFrame::OnLanguageChange, this);
     
-    textCtrl->Bind(wxEVT_CHAR_HOOK, [this](wxKeyEvent& evt) {
+    textCtrl->Bind(wxEVT_KEY_DOWN, [this](wxKeyEvent& evt) {
         if (evt.GetKeyCode() == WXK_TAB) {
-            long from, to;
-            textCtrl->GetSelection(&from, &to);
-            textCtrl->Replace(from, to, "    ");
-            textCtrl->SetInsertionPoint(from + 4);
+            int pos = textCtrl->GetCurrentPos();
+            textCtrl->InsertText(pos, "    ");
+            textCtrl->SetCurrentPos(pos + 4);
             return;
         }
         evt.Skip();
@@ -146,7 +115,7 @@ MainFrame::MainFrame(const wxString& title)
     Bind(wxEVT_MENU, &MainFrame::OnSave, this, wxID_SAVE);
     Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
-    Bind(wxEVT_TEXT, &MainFrame::OnText, this);
+    Bind(wxEVT_STC_CHANGE, &MainFrame::OnText, this);
 }
 
 MainFrame::~MainFrame()
@@ -156,7 +125,7 @@ MainFrame::~MainFrame()
 
 wxIMPLEMENT_APP(App);
 
-//showing the frame
+//show main frame
 bool App::OnInit() {
     SetExitOnFrameDelete(true);
 
@@ -189,7 +158,7 @@ void MainFrame::HighlightSyntax() {
     }
 }
 
-//function to get language for syntax highlighting based on file extension
+//get language for syntax highlight by extension
 wxString MainFrame::GetLanguageForExtension(const wxString& filename) const {
     wxString ext = filename.AfterLast('.').Lower();
     if (ext == "cpp" || ext == "h" || ext == "hpp") {
@@ -246,7 +215,7 @@ void MainFrame::OnSave(wxCommandEvent& event)
     }
 }
 
-//protecting against unsupported file formats
+//check unsupported file formats
 bool IsFileSupported(const wxString& filename) {
     wxString ext = filename.AfterLast('.').Lower();
     std::vector<wxString> unsupportedFileFormats = {"docx", "xlsx", "pptx", "pdf", "exe", "dll", "bin", "iso", "img",
@@ -258,7 +227,7 @@ bool IsFileSupported(const wxString& filename) {
     return true;
 }
 
-//open associated file function, it also applies syntax highlighting according to file type
+//open file and apply syntax highlight
 void MainFrame::OpenFile(const wxString& path)
 {
     wxString fullPath = path;
@@ -293,7 +262,7 @@ void MainFrame::OpenFile(const wxString& path)
     HighlightSyntax();
 }
 
-//open file function
+//open file dialog
 void MainFrame::OnOpen(wxCommandEvent& event)
 {
     wxFileDialog openFileDialog(
@@ -339,7 +308,7 @@ void MainFrame::OnOpen(wxCommandEvent& event)
     HighlightSyntax();
 }
 
-//drag and drop function
+//handle drag and drop
 void MainFrame::OnDropFiles(const wxArrayString& filenames)
 {
     if (filenames.GetCount() > 0)
@@ -362,7 +331,7 @@ void MainFrame::OnDropFiles(const wxArrayString& filenames)
 
         textCtrl->SetValue(text);
         textCtrl->Refresh();
-        //applying syntax highlighting according to file type
+            //apply syntax highlight by file type
         languageChoice->SetStringSelection(GetLanguageForExtension(path));
 
         delete currentHighlighter;
@@ -372,14 +341,14 @@ void MainFrame::OnDropFiles(const wxArrayString& filenames)
     }
 }
 
-//ts shows the about window
+//show about window
 void MainFrame::OnAbout(wxCommandEvent& event)
 {
     wxMessageBox("wEditor is simple cross-platform and open-souce text editor written on C++ using wxWidgets framework.",
                  "wEditor beta v1", wxOK | wxICON_INFORMATION);
 }
 
-//ts closes the app
+//close app
 void MainFrame::OnExit(wxCommandEvent& event)
 {
     Close(true);

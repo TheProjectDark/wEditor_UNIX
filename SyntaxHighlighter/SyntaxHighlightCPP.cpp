@@ -9,16 +9,20 @@
 
 #include "SyntaxHighlightCPP.h"
 
-void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
+void SyntaxHighlightCPP::ApplyHighlight(wxStyledTextCtrl* textCtrl)
 {
-
     wxString text = textCtrl->GetValue();
+    int length = text.length();
+    
+        //skip highlighting for empty text
+    if (length == 0) return;
+
     highlightRange.occupiedRanges.clear();
 
-    wxTextAttr normal(*wxWHITE);
-    textCtrl->SetStyle(0, text.length(), normal);
+        //create style array
+    std::string styles(length, STYLE_DEFAULT);
 
-    // Comments
+        //comments
     std::vector<wxString> comments = {
         "//", "/*", "*/"
     };
@@ -38,14 +42,15 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
                 pos = text.find(comment, pos + 1);
                 continue;
             }
-            wxTextAttr commentAttr(wxColour(128, 255, 170));
-            textCtrl->SetStyle(pos, endPos, commentAttr);
+            for (size_t i = pos; i < endPos; i++) {
+                styles[i] = STYLE_COMMENT;
+            }
             highlightRange.Mark(pos, endPos);
             pos = text.find(comment, endPos);
         }
     }
 
-    // Strings
+        //strings
     std::vector<wxString> stringDelimiters = {
         "\"", "'"
     };
@@ -56,8 +61,9 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
             if (!highlightRange.IsOccupied(pos, pos + 1)) {
                 size_t endPos = text.find(delimiter, pos + 1);
                 if (endPos != wxString::npos) {
-                    wxTextAttr stringAttr(wxColour(255, 140, 0));
-                    textCtrl->SetStyle(pos, endPos + 1, stringAttr);
+                    for (size_t i = pos; i <= endPos; i++) {
+                        styles[i] = STYLE_STRING;
+                    }
                     highlightRange.Mark(pos, endPos + 1);
                     pos = text.find(delimiter, endPos + 1);
                 } else {
@@ -69,8 +75,7 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         }
     }
 
-    // Second pass: highlight keywords, types, etc
-    //important shi like includes and stuff
+        //preprocessor directives
     std::vector<wxString> preprocessorDirectives = {
         "#include", "#define", "#ifdef", "#ifndef", "#endif", "#pragma"
     };
@@ -79,15 +84,16 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         size_t pos = text.find(directive);
         while (pos != wxString::npos) {
             if (!highlightRange.IsOccupied(pos, pos + directive.length())) {
-                wxTextAttr preprocAttr(wxColour(0, 128, 128));
-                textCtrl->SetStyle(pos, pos + directive.length(), preprocAttr);
+                for (size_t i = pos; i < pos + directive.length(); i++) {
+                    styles[i] = STYLE_PREPROCESSOR;
+                }
                 highlightRange.Mark(pos, pos + directive.length());
             }
             pos = text.find(directive, pos + 1);
         }
     }
 
-    //also important shi like namespaces
+        //namespaces
     std::vector<wxString> namespaces = {
         "std", "namespace"
     };
@@ -96,30 +102,28 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         size_t pos = text.find(ns);
         while (pos != wxString::npos) {
             if (!highlightRange.IsOccupied(pos, pos + ns.length())) {
-                wxTextAttr nsAttr(wxColour(0, 100, 0));
-                textCtrl->SetStyle(pos, pos + ns.length(), nsAttr);
+                for (size_t i = pos; i < pos + ns.length(); i++) {
+                    styles[i] = STYLE_NAMESPACE;
+                }
                 highlightRange.Mark(pos, pos + ns.length());
             }
             pos = text.find(ns, pos + 1);
         }
     }
 
-    //highlighting for functions, methods and procedures
+        //function highlighting
     std::vector<wxString> controlStatements = {
         "if", "else if", "while", "for", "switch", "catch"
     };
     size_t pos = text.find("(");
     while (pos != wxString::npos) {
         if (!highlightRange.IsOccupied(pos, pos + 1)) {
-            //Check if this is a control statement
             bool isControlStatement = false;
             for (const auto& stmt : controlStatements) {
                 size_t checkPos = pos;
-                //Skip backwards over whitespace
                 while (checkPos > 0 && (text[checkPos - 1] == ' ' || text[checkPos - 1] == '\t')) {
                     checkPos--;
                 }
-                //Check if the keyword is there
                 if (checkPos >= stmt.length() && 
                     text.substr(checkPos - stmt.length(), stmt.length()) == stmt &&
                     (checkPos == stmt.length() || !isalnum(text[checkPos - stmt.length() - 1]))) {
@@ -129,11 +133,9 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
             }
             
             if (!isControlStatement) {
-                //Finding the start of the functions name
                 size_t nameEnd = pos;
                 size_t nameStart = pos;
                 
-                //Move backwards to find the start of identifier
                 while (nameStart > 0) {
                     char ch = text[nameStart - 1];
                     if (isalnum(ch) || ch == '_' || ch == ':') {
@@ -143,10 +145,10 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
                     }
                 }
                 
-                //Only highlight if we found a valid name
                 if (nameStart < nameEnd) {
-                    wxTextAttr funcAttr(wxColour(128, 179, 255));
-                    textCtrl->SetStyle(nameStart, pos, funcAttr);
+                    for (size_t i = nameStart; i < pos; i++) {
+                        styles[i] = STYLE_FUNCTION;
+                    }
                     highlightRange.Mark(nameStart, pos);
                 }
             }
@@ -154,7 +156,7 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         pos = text.find("(", pos + 1);
     }
 
-    //types
+        //types
     std::vector<wxString> types = {
         "int", "float", "double", "char", "void", "bool", "long", "short", "unsigned", "signed", "std::string", "std::vector", "std::map", "string", "class"
     };
@@ -163,15 +165,16 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         size_t pos = text.find(type);
         while (pos != wxString::npos) {
             if (!highlightRange.IsOccupied(pos, pos + type.length())) {
-                wxTextAttr typeAttr(wxColour(51, 153, 255));
-                textCtrl->SetStyle(pos, pos + type.length(), typeAttr);
+                for (size_t i = pos; i < pos + type.length(); i++) {
+                    styles[i] = STYLE_KEYWORD;
+                }
                 highlightRange.Mark(pos, pos + type.length());
             }
             pos = text.find(type, pos + 1);
         }   
     }
 
-    //standard lib functions
+        //standard library functions
     std::vector<wxString> standardLibraryFunctions = {
         "printf", "scanf", "cout", "cin", "endl", "std::cout", "std::cin"
     };
@@ -180,15 +183,16 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         size_t pos = text.find(func);
         while (pos != wxString::npos) {
             if (!highlightRange.IsOccupied(pos, pos + func.length())) {
-                wxTextAttr funcAttr(wxColour(128, 179, 255));
-                textCtrl->SetStyle(pos, pos + func.length(), funcAttr);
+                for (size_t i = pos; i < pos + func.length(); i++) {
+                    styles[i] = STYLE_FUNCTION;
+                }
                 highlightRange.Mark(pos, pos + func.length());
             }
             pos = text.find(func, pos + 1);
         }
     }
 
-    //some keywords
+        //keywords
     std::vector<wxString> keywords = {
         "return", "if", "else", "while", "override", "virtual", "const", "static", "new", "delete", "this"
     };
@@ -197,15 +201,16 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         size_t pos = text.find(word);
         while (pos != wxString::npos) {
             if (!highlightRange.IsOccupied(pos, pos + word.length())) {
-                wxTextAttr kw(wxColour(230, 0, 230));
-                textCtrl->SetStyle(pos, pos + word.length(), kw);
+                for (size_t i = pos; i < pos + word.length(); i++) {
+                    styles[i] = STYLE_KEYWORD;
+                }
                 highlightRange.Mark(pos, pos + word.length());
             }
             pos = text.find(word, pos + 1);
         }
     }
 
-    //control structures
+        //control structures
     std::vector<wxString> controlStructures = {
         "for", "switch", "case", "break", "continue"
     };
@@ -214,15 +219,16 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         size_t pos = text.find(cs);
         while (pos != wxString::npos) {
             if (!highlightRange.IsOccupied(pos, pos + cs.length())) {
-                wxTextAttr csAttr(wxColour(255, 165, 0));
-                textCtrl->SetStyle(pos, pos + cs.length(), csAttr);
+                for (size_t i = pos; i < pos + cs.length(); i++) {
+                    styles[i] = STYLE_KEYWORD;
+                }
                 highlightRange.Mark(pos, pos + cs.length());
             }
             pos = text.find(cs, pos + 1);
         }
     }
 
-    //access modifiers
+        //access modifiers
     std::vector<wxString> accessModifiers = {
         "public", "private", "protected"
     };
@@ -231,15 +237,16 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         size_t pos = text.find(modifier);
         while (pos != wxString::npos) {
             if (!highlightRange.IsOccupied(pos, pos + modifier.length())) {
-                wxTextAttr modAttr(wxColour(107, 107, 255));
-                textCtrl->SetStyle(pos, pos + modifier.length(), modAttr);
+                for (size_t i = pos; i < pos + modifier.length(); i++) {
+                    styles[i] = STYLE_KEYWORD;
+                }
                 highlightRange.Mark(pos, pos + modifier.length());
             }
             pos = text.find(modifier, pos + 1);
         }
     }
 
-    //literals
+        //literals
     std::vector<wxString> literals = {
         "true", "false", "NULL"
     }; 
@@ -248,47 +255,52 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         size_t pos = text.find(literal);
         while (pos != wxString::npos) {
             if (!highlightRange.IsOccupied(pos, pos + literal.length())) {
-                wxTextAttr litAttr(*wxRED);
-                textCtrl->SetStyle(pos, pos + literal.length(), litAttr);
+                for (size_t i = pos; i < pos + literal.length(); i++) {
+                    styles[i] = STYLE_NUMBER;
+                }
                 highlightRange.Mark(pos, pos + literal.length());
             }
             pos = text.find(literal, pos + 1);
         }
     }
 
-    //operators
+        //multi char operators
     std::vector<wxString> operators_multi = {
         "==", "!=", "<=", ">=", "&&", "||", "++", "--"
-    };
-    std::vector<wxString> operators_single = {
-        "+", "-", "*", "/", "=", "<", ">", 
     };
     for (const auto& op : operators_multi)
     {
         size_t pos = text.find(op);
         while (pos != wxString::npos) {
             if (!highlightRange.IsOccupied(pos, pos + op.length())) {
-                wxTextAttr opAttr(wxColour(255, 0, 0));
-                textCtrl->SetStyle(pos, pos + op.length(), opAttr);
-                highlightRange.Mark(pos, pos + op.length());
-            }
-            pos = text.find(op, pos + 1);
-        }
-    }
-    for (const auto& op : operators_single)
-    {
-        size_t pos = text.find(op);
-        while (pos != wxString::npos) {
-            if (!highlightRange.IsOccupied(pos, pos + op.length())) {
-                wxTextAttr opAttr(wxColour(255, 0, 0));
-                textCtrl->SetStyle(pos, pos + op.length(), opAttr);
+                for (size_t i = pos; i < pos + op.length(); i++) {
+                    styles[i] = STYLE_OPERATOR;
+                }
                 highlightRange.Mark(pos, pos + op.length());
             }
             pos = text.find(op, pos + 1);
         }
     }
 
-    //symbols
+        //single char operators
+    std::vector<wxString> operators_single = {
+        "+", "-", "*", "/", "=", "<", ">"
+    };
+    for (const auto& op : operators_single)
+    {
+        size_t pos = text.find(op);
+        while (pos != wxString::npos) {
+            if (!highlightRange.IsOccupied(pos, pos + op.length())) {
+                for (size_t i = pos; i < pos + op.length(); i++) {
+                    styles[i] = STYLE_OPERATOR;
+                }
+                highlightRange.Mark(pos, pos + op.length());
+            }
+            pos = text.find(op, pos + 1);
+        }
+    }
+
+        //symbols
     std::vector<wxString> symbols = {
         "{", "}", "(", ")", "[", "]", ";", ",", "."
     };
@@ -297,11 +309,15 @@ void SyntaxHighlightCPP::ApplyHighlight(wxTextCtrl* textCtrl)
         size_t pos = text.find(symbol);
         while (pos != wxString::npos) {
             if (!highlightRange.IsOccupied(pos, pos + symbol.length())) {
-                wxTextAttr symAttr(wxColour(255, 102, 204));
-                textCtrl->SetStyle(pos, pos + symbol.length(), symAttr);
+                for (size_t i = pos; i < pos + symbol.length(); i++) {
+                    styles[i] = STYLE_OPERATOR;
+                }
                 highlightRange.Mark(pos, pos + symbol.length());
             }
             pos = text.find(symbol, pos + 1);
         }
     }
+    
+        //apply all styles at once
+    textCtrl->SetStyleBytes(length, (char*)styles.c_str());
 }

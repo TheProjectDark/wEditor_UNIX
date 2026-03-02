@@ -9,10 +9,11 @@
 
 #pragma once
 #include <wx/wx.h>
+#include <wx/stc/stc.h>
 #include "SyntaxHighlighter.h"
 
 class Text : public SyntaxHighlighter {
     public:
-        void ApplyHighlight(wxTextCtrl* textCtrl) override;
+        void ApplyHighlight(wxStyledTextCtrl* textCtrl) override;
         wxString GetLanguageName() const override { return "Text"; }
 };

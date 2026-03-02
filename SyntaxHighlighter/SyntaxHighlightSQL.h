@@ -9,9 +9,10 @@
 
 #pragma once
 #include <wx/wx.h>
+#include <wx/stc/stc.h>
 #include "SyntaxHighlighter.h"
 
 class SyntaxHighlightSQL : public SyntaxHighlighter {
-    void ApplyHighlight(wxTextCtrl* textCtrl) override;
+    void ApplyHighlight(wxStyledTextCtrl* textCtrl) override;
     wxString GetLanguageName() const override { return "SQL Script"; }
 };

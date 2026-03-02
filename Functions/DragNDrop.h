@@ -10,7 +10,7 @@
 #pragma once
 #include <wx/dnd.h>
 
-class MainFrame; // forward-declare to avoid include cycle
+class MainFrame; //forward declare to avoid include cycle
 
 class DragNDrop : public wxFileDropTarget {
     MainFrame* m_frame;

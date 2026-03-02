@@ -9,10 +9,11 @@
 
 #pragma once
 #include <wx/wx.h>
+#include <wx/stc/stc.h>
 #include "../SyntaxHighlighter/SyntaxHighlighter.h"
 #include "DragNDrop.h"
 
-//creating the frame class with its functions
+//frame class and functions
 class MainFrame : public wxFrame
 {
     public:
@@ -22,7 +23,7 @@ class MainFrame : public wxFrame
         void OpenFile(const wxString& path);
 
     private:
-        wxTextCtrl* textCtrl;
+        wxStyledTextCtrl* textCtrl;
         wxChoice* languageChoice;
         SyntaxHighlighter* currentHighlighter;
         wxString currentLanguage;
