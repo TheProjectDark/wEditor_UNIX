@@ -21,6 +21,7 @@ class MainFrame : public wxFrame
         ~MainFrame();
         void OnDropFiles(const wxArrayString& filenames);
         void OpenFile(const wxString& path);
+        void RestoreLastFile();
 
     private:
         wxStyledTextCtrl* textCtrl;

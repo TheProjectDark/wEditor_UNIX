@@ -16,14 +16,14 @@ void SyntaxHighlightPython::ApplyHighlight(wxStyledTextCtrl* textCtrl)
     wxString text = textCtrl->GetValue();
     int length = text.length();
     
-        //skip highlighting for empty text
+    //skip highlighting for empty text
     if (length == 0) return;
     
     highlightRange.occupiedRanges.clear();
 
     std::string styles(length, STYLE_DEFAULT);
 
-        //comments
+    //comments
     size_t pos = text.find("#");
     while (pos != wxString::npos) {
         if (!highlightRange.IsOccupied(pos, pos + 1)) {
@@ -39,7 +39,7 @@ void SyntaxHighlightPython::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-        //strings
+    //strings
     std::vector<wxString> stringDelimiters = {"\"", "'"};
     for (const auto& delimiter : stringDelimiters) {
         pos = text.find(delimiter);
@@ -61,7 +61,7 @@ void SyntaxHighlightPython::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-        //keywords
+    //keywords
     std::vector<wxString> keywords = {
         "def", "class", "if", "elif", "else", "for", "while", "return", "try", "except",
         "finally", "with", "pass", "break", "continue", "lambda", "import", "from", "as"
@@ -79,7 +79,7 @@ void SyntaxHighlightPython::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-        //built-in functions
+    //built-in functions
     std::vector<wxString> builtins = {
         "print", "len", "range", "enumerate", "map", "filter", "zip", "sum", "min", "max", "open"
     };
@@ -96,7 +96,7 @@ void SyntaxHighlightPython::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-        //literals
+    //literals
     std::vector<wxString> literals = {"True", "False", "None"};
     for (const auto& literal : literals) {
         pos = text.find(literal);
@@ -111,7 +111,7 @@ void SyntaxHighlightPython::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-        //operators
+    //operators
     std::vector<wxString> operators = {
         "==", "!=", "<=", ">=", "**", "//", "->", "+=", "-=", "*=", "/=",
         "+", "-", "*", "/", "=", "<", ">", "&", "|", "^"
@@ -129,7 +129,7 @@ void SyntaxHighlightPython::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-        //symbols
+    //symbols
     std::vector<wxString> symbols = {"(", ")", "[", "]", "{", "}", ":", ";", ",", "."};
     for (const auto& symbol : symbols) {
         pos = text.find(symbol);

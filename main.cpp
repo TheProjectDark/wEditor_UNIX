@@ -11,6 +11,7 @@
 #include <wx/stc/stc.h>
 #include <wx/filedlg.h>
 #include <wx/file.h>
+#include <wx/config.h>
 #include "Functions/MainFrame.h"
 #include "Functions/ThemeSettings.h"
 
@@ -124,16 +125,31 @@ wxIMPLEMENT_APP(App);
 //show main frame
 bool App::OnInit() {
     SetExitOnFrameDelete(true);
+    wxConfig::Set(new wxConfig("wEditor"));
 
     MainFrame* mainFrame = new MainFrame("wEditor");
     mainFrame->SetClientSize(mainFrame->FromDIP(wxSize(800, 600)));
     mainFrame->Show();
-    wxTheApp->Yield();  // Process pending events to ensure UI is ready
+    wxTheApp->Yield();  //process pending events to ensure UI is ready
+    mainFrame->RestoreLastFile(); //restore last opened file on startup
 
     if (argc > 1) {
         mainFrame->OpenFile(argv[1]);
     }
     return true;
+}
+
+//restore last opened file on startup
+void MainFrame::RestoreLastFile()
+{
+    wxConfigBase* config = wxConfig::Get();
+
+    wxString lastFile = config->Read("Session/LastFile", "");
+
+    if (!lastFile.IsEmpty() && wxFileExists(lastFile))
+    {
+        textCtrl->LoadFile(lastFile);
+    }
 }
 
 //update line number margin width according to line count
@@ -208,6 +224,8 @@ void MainFrame::OnSave(wxCommandEvent& event)
 
         path = saveFileDialog.GetPath();
         currentFilePath = path;  // set current file path
+        wxConfigBase::Get()->Write("Session/LastFile", currentFilePath);
+        wxConfigBase::Get()->Flush();
     }
 
     wxString content = textCtrl->GetValue();
@@ -269,6 +287,9 @@ void MainFrame::OpenFile(const wxString& path)
     currentLanguage = languageChoice->GetStringSelection();
     currentHighlighter = HighlighterFactory::CreateHighlighter(currentLanguage);
     HighlightSyntax();
+    wxConfigBase* config = wxConfig::Get();
+    config->Write("Session/LastFile", fullPath);
+    config->Flush();
 }
 
 //open file dialog

@@ -16,7 +16,7 @@ void SyntaxHighlightJava::ApplyHighlight(wxStyledTextCtrl* textCtrl)
     wxString text = textCtrl->GetValue();
     int length = text.length();
     
-        //skip highlighting for empty text
+    //skip highlighting for empty text
     if (length == 0) return;
     
     highlightRange.occupiedRanges.clear();
@@ -26,11 +26,10 @@ void SyntaxHighlightJava::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         styles[i] = STYLE_DEFAULT;
     }
 
-    // Comments
-        //comments
-        std::vector<wxString> comments = {
-            "//", "/*", "*/"
-        };
+    //comments
+    std::vector<wxString> comments = {
+        "//", "/*", "*/"
+    };
     for (const auto& comment : comments)
     {
         size_t pos = text.find(comment);
@@ -55,11 +54,10 @@ void SyntaxHighlightJava::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Strings
-        //strings
-        std::vector<wxString> stringDelimiters = {
-            "\"", "'"
-        };
+    //strings
+    std::vector<wxString> stringDelimiters = {
+        "\"", "'"
+    };
     for (const auto& delimiter : stringDelimiters)
     {
         size_t pos = text.find(delimiter);
@@ -81,13 +79,12 @@ void SyntaxHighlightJava::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Keywords
-        //keywords
-        std::vector<wxString> keywords = {
-            "public", "private", "protected", "static", "final", "if", "else", "switch", "case", 
-            "for", "while", "do", "return", "new", "this", "super", "extends", "implements", 
-            "try", "catch", "finally", "throw", "throws", "import", "package", "class", "interface"
-        };
+    //keywords
+    std::vector<wxString> keywords = {
+        "public", "private", "protected", "static", "final", "if", "else", "switch", "case", 
+        "for", "while", "do", "return", "new", "this", "super", "extends", "implements", 
+        "try", "catch", "finally", "throw", "throws", "import", "package", "class", "interface"
+    };
     for (const auto& keyword : keywords)
     {
         size_t pos = text.find(keyword);
@@ -102,11 +99,10 @@ void SyntaxHighlightJava::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Types
-        //types
-        std::vector<wxString> types = {
-            "int", "float", "double", "char", "void", "boolean", "long", "short", "byte", "String"
-        };
+    //types
+    std::vector<wxString> types = {
+        "int", "float", "double", "char", "void", "boolean", "long", "short", "byte", "String"
+    };
     for (const auto& type : types)
     {
         size_t pos = text.find(type);
@@ -121,11 +117,10 @@ void SyntaxHighlightJava::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Literals
-        //literals
-        std::vector<wxString> literals = {
-            "true", "false", "null"
-        };
+    //literals
+    std::vector<wxString> literals = {
+        "true", "false", "null"
+    };
     for (const auto& literal : literals)
     {
         size_t pos = text.find(literal);
@@ -140,11 +135,10 @@ void SyntaxHighlightJava::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Operators
-        //operators
-        std::vector<wxString> operators_multi = {
-            "==", "!=", "<=", ">=", "&&", "||", "++", "--"
-        };
+    //operators
+    std::vector<wxString> operators_multi = {
+        "==", "!=", "<=", ">=", "&&", "||", "++", "--"
+    };
     for (const auto& op : operators_multi)
     {
         size_t pos = text.find(op);
@@ -158,7 +152,8 @@ void SyntaxHighlightJava::ApplyHighlight(wxStyledTextCtrl* textCtrl)
             pos = text.find(op, pos + 1);
         }
     }
-
+    
+    //single char operators
     std::vector<wxString> operators_single = {
         "+", "-", "*", "/", "=", "<", ">"
     };
@@ -176,11 +171,10 @@ void SyntaxHighlightJava::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Symbols
-        //symbols
-        std::vector<wxString> symbols = {
-            "{", "}", "(", ")", "[", "]", ";", ",", "."
-        };
+    //symbols
+    std::vector<wxString> symbols = {
+        "{", "}", "(", ")", "[", "]", ";", ",", "."
+    };
     for (const auto& symbol : symbols)
     {
         size_t pos = text.find(symbol);

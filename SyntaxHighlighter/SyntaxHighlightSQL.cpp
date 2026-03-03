@@ -16,14 +16,14 @@ void SyntaxHighlightSQL::ApplyHighlight(wxStyledTextCtrl* textCtrl)
     wxString text = textCtrl->GetValue();
     int length = text.length();
     
-    // Skip highlighting for empty text
+    //skip highlighting for empty text
     if (length == 0) return;
     
     highlightRange.occupiedRanges.clear();
 
     std::string styles(length, STYLE_DEFAULT);
 
-    // Comments--
+    //comments--
     size_t pos = text.find("--");
     while (pos != wxString::npos) {
         if (!highlightRange.IsOccupied(pos, pos + 2)) {
@@ -39,7 +39,7 @@ void SyntaxHighlightSQL::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Comments /* */
+    //comments /* */
     pos = text.find("/*");
     while (pos != wxString::npos) {
         if (!highlightRange.IsOccupied(pos, pos + 2)) {
@@ -59,7 +59,7 @@ void SyntaxHighlightSQL::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Strings
+    //strings
     std::vector<wxString> stringDelimiters = {"'", "\""};
     for (const auto& delimiter : stringDelimiters) {
         pos = text.find(delimiter);
@@ -81,7 +81,7 @@ void SyntaxHighlightSQL::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Keywords
+    //keywords
     std::vector<wxString> keywords = {
         "SELECT", "FROM", "WHERE", "INSERT", "UPDATE", "DELETE", "JOIN", "INNER", "LEFT", "RIGHT",
         "ON", "CREATE", "TABLE", "ALTER", "DROP", "INDEX", "VIEW", "TRIGGER", "PROCEDURE",
@@ -105,7 +105,7 @@ void SyntaxHighlightSQL::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Data types
+    //data types
     std::vector<wxString> dataTypes = {
         "INT", "VARCHAR", "CHAR", "TEXT", "FLOAT", "DOUBLE", "DECIMAL", "DATE", "TIMESTAMP",
         "int", "varchar", "char", "text", "float", "double", "decimal", "date", "timestamp"
@@ -123,7 +123,7 @@ void SyntaxHighlightSQL::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Functions
+    //functions
     std::vector<wxString> functions = {
         "COUNT", "SUM", "AVG", "MIN", "MAX", "ROUND", "UPPER", "LOWER", "LENGTH",
         "count", "sum", "avg", "min", "max", "round", "upper", "lower", "length"
@@ -141,7 +141,7 @@ void SyntaxHighlightSQL::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Operators and symbols
+    //operators and symbols
     std::vector<wxString> operators = {"=", "<", ">", "<=", ">=", "<>", "!=", "+", "-", "*", "/", "%", "(", ")", ",", ";"};
     for (const auto& op : operators) {
         pos = text.find(op);

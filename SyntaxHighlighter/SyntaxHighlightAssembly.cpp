@@ -23,7 +23,7 @@ void SyntaxHighlightAssembly::ApplyHighlight(wxStyledTextCtrl* textCtrl)
 
     std::string styles(length, STYLE_DEFAULT);
 
-    // Comments
+    //comments
     size_t pos = text.find(";");
     while (pos != wxString::npos) {
         if (!highlightRange.IsOccupied(pos, pos + 1)) {
@@ -39,7 +39,7 @@ void SyntaxHighlightAssembly::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Assembly instructions
+    //assembly instructions
     std::vector<wxString> instructions = {
         "mov", "add", "sub", "mul", "div", "jmp", "cmp", "je", "jne", "call", "ret",
         "push", "pop", "jg", "jl", "jge", "jle", "and", "or", "xor", "not", "shl", "shr",
@@ -58,7 +58,7 @@ void SyntaxHighlightAssembly::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Registers
+    //registers
     std::vector<wxString> registers = {
         "eax", "ebx", "ecx", "edx", "esi", "edi", "esp", "ebp",
         "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rsp", "rbp",
@@ -78,7 +78,7 @@ void SyntaxHighlightAssembly::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Symbols and operators
+    //symbols and operators
     std::vector<wxString> symbols = {":", ",", "[", "]", "+", "-", "*"};
     for (const auto& symbol : symbols) {
         pos = text.find(symbol);
@@ -91,7 +91,7 @@ void SyntaxHighlightAssembly::ApplyHighlight(wxStyledTextCtrl* textCtrl)
         }
     }
 
-    // Labels (text followed by :)
+    //labels (text followed by :)
     for (int i = 0; i < length; i++) {
         if ((isalpha(text[i]) || text[i] == '_') && (i == 0 || text[i-1] == '\n')) {
             size_t j = i;

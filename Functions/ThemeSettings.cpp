@@ -114,6 +114,5 @@ void ThemeSettings::ApplyDarkTheme(wxStyledTextCtrl* textCtrl)
     textCtrl->SetViewWhiteSpace(wxSTC_WS_INVISIBLE);
     textCtrl->SetViewEOL(false);
     textCtrl->SetCaretLineVisible(false);
-    textCtrl->SetTwoPhaseDraw(false);
     textCtrl->SetWrapMode(wxSTC_WRAP_WORD);
 }
