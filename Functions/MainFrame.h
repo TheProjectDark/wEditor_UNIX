@@ -35,6 +35,7 @@ class MainFrame : public wxFrame
 
         void OnExit(wxCommandEvent& event);
         void OnAbout(wxCommandEvent& event);
+        void OnNewFile(wxCommandEvent& event);
         void OnSave(wxCommandEvent& event);
         void OnOpen(wxCommandEvent& event);
         void OnText(wxCommandEvent& event);

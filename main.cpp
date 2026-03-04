@@ -54,6 +54,7 @@ MainFrame::MainFrame(const wxString& title)
     textCtrl = new wxStyledTextCtrl(panel, wxID_ANY);
     ThemeSettings::ApplyDarkTheme(textCtrl);
     
+    wxButton* newFile = new wxButton(panel, wxID_ANY, "New file");
     wxButton* save = new wxButton(panel, wxID_ANY, "Save");
     wxButton* open = new wxButton(panel, wxID_ANY, "Open");
 
@@ -73,6 +74,8 @@ MainFrame::MainFrame(const wxString& title)
     wxColour buttonBackground = ThemeSettings::GetButtonBackgroundColour();
     wxColour buttonForeground(255, 255, 255);
     
+    newFile->SetBackgroundColour(buttonBackground);
+    newFile->SetForegroundColour(buttonForeground);
     save->SetBackgroundColour(buttonBackground);
     save->SetForegroundColour(buttonForeground);
     open->SetBackgroundColour(buttonBackground);
@@ -85,6 +88,7 @@ MainFrame::MainFrame(const wxString& title)
     wxBoxSizer* topSizer  = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
+    buttonSizer->Add(newFile, 0, wxRIGHT, 5);
     buttonSizer->Add(save, 0, wxRIGHT, 5);
     buttonSizer->Add(open, 0);
     topSizer->Add(buttonSizer, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
@@ -104,6 +108,7 @@ MainFrame::MainFrame(const wxString& title)
     textCtrl->SetBackSpaceUnIndents(true);
 
     //setup bindings
+    newFile->Bind(wxEVT_BUTTON, &MainFrame::OnNewFile, this);
     save->Bind(wxEVT_BUTTON, &MainFrame::OnSave, this);
     open->Bind(wxEVT_BUTTON, &MainFrame::OnOpen, this);
     languageChoice->Bind(wxEVT_CHOICE, &MainFrame::OnLanguageChange, this);
@@ -196,6 +201,25 @@ wxString MainFrame::GetLanguageForExtension(const wxString& filename) const {
         return "SQL Script";
     } else {
         return "Text";
+    }
+}
+
+//new file function
+void MainFrame::OnNewFile(wxCommandEvent& event) 
+{
+    textCtrl->Clear();
+    currentFilePath.Clear();
+    languageChoice->SetSelection(0);
+    delete currentHighlighter;
+    currentHighlighter = HighlighterFactory::CreateHighlighter("Text");
+    HighlightSyntax();
+    wxConfigBase::Get()->DeleteEntry("Session/LastFile");
+    wxConfigBase::Get()->Flush();
+    OnSave(event); //save new file
+    //loading new file to apply syntax highlight
+    wxString path = currentFilePath;
+    if (!path.IsEmpty()) {
+        OpenFile(path);
     }
 }
 
