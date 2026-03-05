@@ -14,6 +14,9 @@
 #include <wx/config.h>
 #include "Functions/MainFrame.h"
 #include "Functions/ThemeSettings.h"
+#ifdef __WXMSW__
+#include <wx/icon.h>
+#endif
 
 //app class to launch this editor
 class App : public wxApp
@@ -53,8 +56,15 @@ MainFrame::MainFrame(const wxString& title)
 
     textCtrl = new wxStyledTextCtrl(panel, wxID_ANY);
     ThemeSettings::ApplyDarkTheme(textCtrl);
+
+    #ifdef __WXMSW__
+    wxIcon icon;
+    icon.CopyFromBitmap(wxBitmap(":/app.ico"));
+    SetIcon(icon);
+    #endif
     
     wxButton* newFile = new wxButton(panel, wxID_ANY, "New file");
+    wxButton* saveAs = new wxButton(panel, wxID_ANY, "Save as");
     wxButton* save = new wxButton(panel, wxID_ANY, "Save");
     wxButton* open = new wxButton(panel, wxID_ANY, "Open");
 
@@ -76,6 +86,8 @@ MainFrame::MainFrame(const wxString& title)
     
     newFile->SetBackgroundColour(buttonBackground);
     newFile->SetForegroundColour(buttonForeground);
+    saveAs->SetBackgroundColour(buttonBackground);
+    saveAs->SetForegroundColour(buttonForeground);
     save->SetBackgroundColour(buttonBackground);
     save->SetForegroundColour(buttonForeground);
     open->SetBackgroundColour(buttonBackground);
@@ -89,6 +101,7 @@ MainFrame::MainFrame(const wxString& title)
     wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
     buttonSizer->Add(newFile, 0, wxRIGHT, 5);
+    buttonSizer->Add(saveAs, 0, wxRIGHT, 5);
     buttonSizer->Add(save, 0, wxRIGHT, 5);
     buttonSizer->Add(open, 0);
     topSizer->Add(buttonSizer, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
@@ -109,12 +122,15 @@ MainFrame::MainFrame(const wxString& title)
 
     //setup bindings
     newFile->Bind(wxEVT_BUTTON, &MainFrame::OnNewFile, this);
+    saveAs->Bind(wxEVT_BUTTON, &MainFrame::OnSaveAs, this);
     save->Bind(wxEVT_BUTTON, &MainFrame::OnSave, this);
     open->Bind(wxEVT_BUTTON, &MainFrame::OnOpen, this);
     languageChoice->Bind(wxEVT_CHOICE, &MainFrame::OnLanguageChange, this);
 
+    Bind(wxEVT_MENU, &MainFrame::OnNewFile, this, wxID_NEW);
     Bind(wxEVT_MENU, &MainFrame::OnOpen, this, wxID_OPEN);
     Bind(wxEVT_MENU, &MainFrame::OnSave, this, wxID_SAVE);
+    Bind(wxEVT_MENU, &MainFrame::OnSaveAs, this, wxID_SAVEAS);
     Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_STC_CHANGE, &MainFrame::OnText, this);
@@ -221,6 +237,24 @@ void MainFrame::OnNewFile(wxCommandEvent& event)
     if (!path.IsEmpty()) {
         OpenFile(path);
     }
+}
+
+//save as function
+void MainFrame::OnSaveAs(wxCommandEvent& event)
+{    wxFileDialog saveFileDialog(
+        this,
+        "Save file",
+        "",
+        "",
+        "Text & Code files (*.txt;*.cpp;*.h;*.hpp;*.c;*.json;*.md;*.ini)|*.txt;*.cpp;*.h;*.hpp;*.c;*.json;*.md;*.ini|All files (*.*)|*.*",
+        wxFD_SAVE | wxFD_OVERWRITE_PROMPT
+    );
+
+    if (saveFileDialog.ShowModal() == wxID_CANCEL)
+        return;
+
+    currentFilePath = saveFileDialog.GetPath();
+    OnSave(event);
 }
 
 //save file function
