@@ -12,6 +12,7 @@
 #include <wx/stc/stc.h>
 #include "../SyntaxHighlighter/SyntaxHighlighter.h"
 #include "DragNDrop.h"
+#include "../Preferences/Preferences.h"
 
 //frame class and functions
 class MainFrame : public wxFrame
@@ -51,6 +52,7 @@ class MainFrame : public wxFrame
         void OnOpen(wxCommandEvent& event);
         void OnUndo(wxCommandEvent& event);
         void OnRedo(wxCommandEvent& event);
+        void OnPreferences(wxCommandEvent& event);
         void OnText(wxCommandEvent& event);
         void OnLanguageChange(wxCommandEvent& event);
         void HighlightSyntax();

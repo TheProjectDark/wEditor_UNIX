@@ -47,6 +47,7 @@ MainFrame::MainFrame(const wxString& title)
     menuFile->Append(wxID_OPEN);
     menuFile->Append(wxID_UNDO);
     menuFile->Append(wxID_REDO);
+    menuFile->Append(wxID_PREFERENCES);
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
 
@@ -159,6 +160,7 @@ MainFrame::MainFrame(const wxString& title)
     Bind(wxEVT_MENU, &MainFrame::OnOpen, this, wxID_OPEN);
     Bind(wxEVT_MENU, &MainFrame::OnUndo, this, wxID_UNDO);
     Bind(wxEVT_MENU, &MainFrame::OnRedo, this, wxID_REDO);
+    Bind(wxEVT_MENU, &MainFrame::OnPreferences, this, wxID_PREFERENCES);
     Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_STC_CHANGE, &MainFrame::OnText, this);
@@ -467,6 +469,14 @@ void MainFrame::OnDropFiles(const wxArrayString& filenames)
         currentHighlighter = HighlighterFactory::CreateHighlighter(currentLanguage);
         HighlightSyntax();
     }
+}
+
+//show preferences window
+void MainFrame::OnPreferences(wxCommandEvent& event)
+{    
+    PreferencesFrame* preferencesFrame = new PreferencesFrame("Preferences");
+    preferencesFrame->SetClientSize(preferencesFrame->FromDIP(wxSize(400, 300)));
+    preferencesFrame->Show();
 }
 
 //show about window
