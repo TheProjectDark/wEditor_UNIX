@@ -39,6 +39,8 @@ class MainFrame : public wxFrame
         void OnSaveAs(wxCommandEvent& event);
         void OnSave(wxCommandEvent& event);
         void OnOpen(wxCommandEvent& event);
+        void OnUndo(wxCommandEvent& event);
+        void OnRedo(wxCommandEvent& event);
         void OnText(wxCommandEvent& event);
         void OnLanguageChange(wxCommandEvent& event);
         void HighlightSyntax();

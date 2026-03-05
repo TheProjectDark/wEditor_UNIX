@@ -41,8 +41,12 @@ MainFrame::MainFrame(const wxString& title)
     SetForegroundColour(darkText);
     //create menu
     wxMenu *menuFile = new wxMenu;
-    menuFile->Append(wxID_OPEN);
+    menuFile->Append(wxID_NEW);
+    menuFile->Append(wxID_SAVEAS);
     menuFile->Append(wxID_SAVE);
+    menuFile->Append(wxID_OPEN);
+    menuFile->Append(wxID_UNDO);
+    menuFile->Append(wxID_REDO);
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
 
@@ -68,6 +72,10 @@ MainFrame::MainFrame(const wxString& title)
     wxButton* save = new wxButton(panel, wxID_ANY, "Save");
     wxButton* open = new wxButton(panel, wxID_ANY, "Open");
 
+    //undo and redo buttons (ctrl+z and ctrl+y)
+    wxButton* undo = new wxButton(panel, wxID_ANY, "<-");
+    wxButton* redo = new wxButton(panel, wxID_ANY, "->");
+
     //enable drag and drop
     DragNDrop* dropTarget = new DragNDrop(this);
     textCtrl->SetDropTarget(dropTarget);
@@ -92,6 +100,11 @@ MainFrame::MainFrame(const wxString& title)
     save->SetForegroundColour(buttonForeground);
     open->SetBackgroundColour(buttonBackground);
     open->SetForegroundColour(buttonForeground);
+    undo->SetBackgroundColour(buttonBackground);
+    undo->SetForegroundColour(buttonForeground);
+    redo->SetBackgroundColour(buttonBackground);
+    redo->SetForegroundColour(buttonForeground);
+
     languageChoice->SetBackgroundColour(buttonBackground);
     languageChoice->SetForegroundColour(buttonForeground);
 
@@ -99,18 +112,29 @@ MainFrame::MainFrame(const wxString& title)
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer* topSizer  = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer* rightButtonSizer = new wxBoxSizer(wxHORIZONTAL);
 
+    //main buttons on left of the top bar
     buttonSizer->Add(newFile, 0, wxRIGHT, 5);
     buttonSizer->Add(saveAs, 0, wxRIGHT, 5);
     buttonSizer->Add(save, 0, wxRIGHT, 5);
     buttonSizer->Add(open, 0);
+    //add undo and redo buttons right to the top bar but before language choice
+    rightButtonSizer->Add(undo, 0, wxRIGHT, 5);
+    rightButtonSizer->Add(redo, 0);
+
     topSizer->Add(buttonSizer, 0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
     topSizer->AddStretchSpacer();
+    topSizer->Add(rightButtonSizer, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
     topSizer->Add(languageChoice, 0, wxALIGN_CENTER_VERTICAL);
     mainSizer->Add(topSizer, 0, wxEXPAND | wxALL, 5);
     mainSizer->Add(textCtrl, 1, wxEXPAND | wxALL, 5);
     panel->SetSizer(mainSizer);
     mainSizer->SetSizeHints(this);
+    //set small size for undo and redo buttons
+    undo->SetMinSize(wxSize(30, -1));
+    redo->SetMinSize(wxSize(30, -1));
+
     languageChoice->SetMinSize(wxSize(140, -1));
 
     //tab
@@ -125,12 +149,16 @@ MainFrame::MainFrame(const wxString& title)
     saveAs->Bind(wxEVT_BUTTON, &MainFrame::OnSaveAs, this);
     save->Bind(wxEVT_BUTTON, &MainFrame::OnSave, this);
     open->Bind(wxEVT_BUTTON, &MainFrame::OnOpen, this);
+    undo->Bind(wxEVT_BUTTON, &MainFrame::OnUndo, this);
+    redo->Bind(wxEVT_BUTTON, &MainFrame::OnRedo, this);
     languageChoice->Bind(wxEVT_CHOICE, &MainFrame::OnLanguageChange, this);
 
     Bind(wxEVT_MENU, &MainFrame::OnNewFile, this, wxID_NEW);
-    Bind(wxEVT_MENU, &MainFrame::OnOpen, this, wxID_OPEN);
-    Bind(wxEVT_MENU, &MainFrame::OnSave, this, wxID_SAVE);
     Bind(wxEVT_MENU, &MainFrame::OnSaveAs, this, wxID_SAVEAS);
+    Bind(wxEVT_MENU, &MainFrame::OnSave, this, wxID_SAVE);
+    Bind(wxEVT_MENU, &MainFrame::OnOpen, this, wxID_OPEN);
+    Bind(wxEVT_MENU, &MainFrame::OnUndo, this, wxID_UNDO);
+    Bind(wxEVT_MENU, &MainFrame::OnRedo, this, wxID_REDO);
     Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_STC_CHANGE, &MainFrame::OnText, this);
@@ -396,6 +424,18 @@ void MainFrame::OnOpen(wxCommandEvent& event)
     HighlightSyntax();
 }
 
+//undo and redo functions
+void MainFrame::OnUndo(wxCommandEvent& event) {
+    if (textCtrl->CanUndo()) {
+        textCtrl->Undo();
+    }
+}
+void MainFrame::OnRedo(wxCommandEvent& event) {
+    if (textCtrl->CanRedo()) {
+        textCtrl->Redo();
+    }
+}
+
 //handle drag and drop
 void MainFrame::OnDropFiles(const wxArrayString& filenames)
 {
@@ -419,7 +459,7 @@ void MainFrame::OnDropFiles(const wxArrayString& filenames)
 
         textCtrl->SetValue(text);
         textCtrl->Refresh();
-            //apply syntax highlight by file type
+        //apply syntax highlight by file type
         languageChoice->SetStringSelection(GetLanguageForExtension(path));
 
         delete currentHighlighter;
@@ -432,8 +472,8 @@ void MainFrame::OnDropFiles(const wxArrayString& filenames)
 //show about window
 void MainFrame::OnAbout(wxCommandEvent& event)
 {
-    wxMessageBox("wEditor is simple cross-platform and open-souce text editor written on C++ using wxWidgets framework.",
-                 "wEditor beta v1", wxOK | wxICON_INFORMATION);
+    wxMessageBox("wEditor is simple cross-platform and open-souce text editor written on C++ using wxWidgets library.",
+                 "wEditor beta v2.0", wxOK | wxICON_INFORMATION);
 }
 
 //close app
