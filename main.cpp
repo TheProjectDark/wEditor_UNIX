@@ -274,7 +274,7 @@ void MainFrame::OnSaveAs(wxCommandEvent& event)
         "Save file",
         "",
         "",
-        "Text & Code files (*.txt;*.cpp;*.h;*.hpp;*.c;*.json;*.md;*.ini)|*.txt;*.cpp;*.h;*.hpp;*.c;*.json;*.md;*.ini|All files (*.*)|*.*",
+        wildcard,
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT
     );
 
@@ -299,7 +299,7 @@ void MainFrame::OnSave(wxCommandEvent& event)
             "Save file",
             "",
             "",
-            "Text & Code files (*.txt;*.cpp;*.h;*.hpp;*.c;*.json;*.md;*.ini)|*.txt;*.cpp;*.h;*.hpp;*.c;*.json;*.md;*.ini|All files (*.*)|*.*",
+            wildcard,
             wxFD_SAVE | wxFD_OVERWRITE_PROMPT
         );
 
@@ -386,7 +386,7 @@ void MainFrame::OnOpen(wxCommandEvent& event)
         "Open file",
         "",
         "",
-        "Text & Code files (*.txt;*.cpp;*.h;*.hpp;*.c;*.json;*.md;*.ini)|*.txt;*.cpp;*.h;*.hpp;*.c;*.json;*.md;*.ini|All files (*.*)|*.*",
+        wildcard,
         wxFD_OPEN | wxFD_FILE_MUST_EXIST
     );
     

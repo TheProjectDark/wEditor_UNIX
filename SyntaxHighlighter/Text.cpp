@@ -10,6 +10,8 @@
 #include "Text.h"
 
 void Text::ApplyHighlight(wxStyledTextCtrl* textCtrl) {
+    textCtrl->ClearDocumentStyle(); //fix
+    textCtrl->SetLexer(wxSTC_LEX_NULL); //fix
     wxString text = textCtrl->GetValue();
     int length = text.length();
     

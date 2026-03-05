@@ -26,6 +26,16 @@ class MainFrame : public wxFrame
         //debounce for highlight
         wxTimer highlightTimer;
 
+        //wildcard
+        wxString wildcard =
+        "Text files (*.txt)|*.txt|"
+        "C++ files (*.cpp;*.hpp;*.h)|*.cpp;*.hpp;*.h|"
+        "C files (*.c;*.h)|*.c;*.h|"
+        "Java files (*.java)|*.java|"
+        "Python files (*.py)|*.py|"
+        "Assembly files (*.asm;*.s)|*.asm;*.s|"
+        "SQL files (*.sql)|*.sql|"
+        "All files (*.*)|*.*";
     private:
         wxStyledTextCtrl* textCtrl;
         wxChoice* languageChoice;
