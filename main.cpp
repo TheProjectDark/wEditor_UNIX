@@ -255,6 +255,8 @@ void MainFrame::OnSaveAs(wxCommandEvent& event)
 
     currentFilePath = saveFileDialog.GetPath();
     OnSave(event);
+    wxConfigBase::Get()->Write("Session/LastFile", currentFilePath);
+    wxConfigBase::Get()->Flush();
 }
 
 //save file function
@@ -437,5 +439,14 @@ void MainFrame::OnAbout(wxCommandEvent& event)
 //close app
 void MainFrame::OnExit(wxCommandEvent& event)
 {
+    //auto save current file on exit
+    if (!currentFilePath.IsEmpty()) {
+        wxString content = textCtrl->GetValue();
+        wxFile file;
+        if (file.Open(currentFilePath, wxFile::write))        {
+            file.Write(content);
+            file.Close();
+        }
+    }
     Close(true);
 }
