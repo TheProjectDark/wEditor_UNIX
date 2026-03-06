@@ -15,7 +15,7 @@
 #include "Functions/MainFrame.h"
 #include "Functions/ThemeSettings.h"
 #ifdef __WXMSW__
-#include <wx/icon.h>
+    #include <wx/icon.h>
 #endif
 
 //app class to launch this editor
@@ -63,9 +63,7 @@ MainFrame::MainFrame(const wxString& title)
     ThemeSettings::ApplyDarkTheme(textCtrl);
 
     #ifdef __WXMSW__
-    wxIcon icon;
-    icon.CopyFromBitmap(wxBitmap(":/app.ico"));
-    SetIcon(icon);
+    SetIcon(wxIcon("app.ico", wxBITMAP_TYPE_ICO));
     #endif
     
     wxButton* newFile = new wxButton(panel, wxID_ANY, "New file");
