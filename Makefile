@@ -1,21 +1,44 @@
-CXX = clang++
-CXXFLAGS = -std=c++20
-SRC = main.cpp SyntaxHighlighter/SyntaxHighlightCPP.cpp SyntaxHighlighter/SyntaxHighlighter.cpp SyntaxHighlighter/Text.cpp SyntaxHighlighter/SyntaxHighlightC.cpp SyntaxHighlighter/SyntaxHighlightJava.cpp SyntaxHighlighter/SyntaxHighlightPython.cpp SyntaxHighlighter/SyntaxHighlightAssembly.cpp SyntaxHighlighter/SyntaxHighlightSQL.cpp Functions/DragNDrop.cpp Functions/ThemeSettings.cpp Preferences/Preferences.cpp
+#Detect OS
+UNAME_S := $(shell uname -s)
+
+#Compiler selection
+ifeq ($(UNAME_S),Linux)
+    CXX = g++
+endif
+ifeq ($(UNAME_S),Darwin)
+    CXX = clang++
+endif
+
+#Compiler flags
+CXXFLAGS = -std=c++20 -O2
+
 TARGET = wEditor
-WX_CONFIG = /usr/local/bin/wx-config
 
-# Get the base libraries and add stc explicitly
-WX_LIBS = $(shell $(WX_CONFIG) --libs)
-WX_STC_LIB = /usr/local/lib/libwx_osx_cocoau_stc-3.3.a
-WX_SCINTILLA_LIB = -lwxscintilla-3.3
-WX_LEXILLA_LIB = -lwxlexilla-3.3
+SRC = \
+main.cpp \
+SyntaxHighlighter/SyntaxHighlightCPP.cpp \
+SyntaxHighlighter/SyntaxHighlighter.cpp \
+SyntaxHighlighter/Text.cpp \
+SyntaxHighlighter/SyntaxHighlightC.cpp \
+SyntaxHighlighter/SyntaxHighlightJava.cpp \
+SyntaxHighlighter/SyntaxHighlightPython.cpp \
+SyntaxHighlighter/SyntaxHighlightAssembly.cpp \
+SyntaxHighlighter/SyntaxHighlightSQL.cpp \
+Functions/DragNDrop.cpp \
+Functions/ThemeSettings.cpp \
+Preferences/Preferences.cpp
 
-.PHONY: all build clean
+WX_CONFIG = wx-config
+
+WX_CXXFLAGS = $(shell $(WX_CONFIG) --cxxflags)
+WX_LIBS = $(shell $(WX_CONFIG) --libs std,stc)
+
+.PHONY: all clean
 
 all: $(TARGET)
-build: $(TARGET)
+
 $(TARGET): $(SRC)
-	$(CXX) $(CXXFLAGS) $(shell $(WX_CONFIG) --cxxflags) $(SRC) -o $(TARGET) $(WX_STC_LIB) $(WX_LIBS) $(WX_SCINTILLA_LIB) $(WX_LEXILLA_LIB)
+	$(CXX) $(CXXFLAGS) $(WX_CXXFLAGS) $(SRC) -o $(TARGET) $(WX_LIBS)
 
 clean:
 	rm -f $(TARGET)
